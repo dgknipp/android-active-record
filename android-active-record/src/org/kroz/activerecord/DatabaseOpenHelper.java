@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Provides access to a database of notes. Each note has a title, the note
@@ -19,7 +20,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	DatabaseBuilder mBuilder;
-	
+
 	DatabaseOpenHelper(Context ctx, String dbName, DatabaseBuilder builder) {
 		super(ctx, dbName, null, currentPackageVersion(ctx));
 		mBuilder = builder;
@@ -27,9 +28,17 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		for(String table: mBuilder.getTables()) {
-			String sqlStr = mBuilder.getSQLCreate(table);
-			db.execSQL(sqlStr);
+		for (String table : mBuilder.getTables()) {
+			String sqlStr = null;
+			try {
+				sqlStr = mBuilder.getSQLCreate(table);
+			} catch (IllegalAccessException e) {
+				Log.e(this.getClass().getName(), e.getMessage(), e);
+			} catch (InstantiationException e) {
+				Log.e(this.getClass().getName(), e.getMessage(), e);
+			}
+			if (sqlStr != null)
+				db.execSQL(sqlStr);
 		}
 		// db.execSQL(ShowplacesTable.SQL_CREATE);
 		// db.execSQL(FileInfoTable.SQL_CREATE);
@@ -38,7 +47,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		for(String table: mBuilder.getTables()) {
+		for (String table : mBuilder.getTables()) {
 			String sqlStr = mBuilder.getSQLDrop(table);
 			db.execSQL(sqlStr);
 		}
