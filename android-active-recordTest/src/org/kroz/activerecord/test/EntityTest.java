@@ -3,7 +3,7 @@
  */
 package org.kroz.activerecord.test;
 
-import org.kroz.activerecord.Entity;
+import org.kroz.activerecord.ActiveRecordBase;
 
 import android.test.AndroidTestCase;
 
@@ -22,11 +22,11 @@ public class EntityTest extends AndroidTestCase {
 	}
 
 	/**
-	 * Test method for {@link org.kroz.activerecord.Entity#test()}.
+	 * Test method for {@link org.kroz.activerecord.ActiveRecordBase#test()}.
 	 */
 	public void testTest() {
-		Entity e = new Entity();
-		assertEquals("Hello!", e.test());
+		ActiveRecordBase e = new ActiveRecordBase();
+		assertEquals("Hello", e.test());
 	}
 
 }
