@@ -18,15 +18,19 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
-	public static final String DATABASE_NAME = "mobta.db";
-
-	DatabaseOpenHelper(String dbName, Context ctx) {
+	DatabaseBuilder mBuilder;
+	
+	DatabaseOpenHelper(Context ctx, String dbName, DatabaseBuilder builder) {
 		super(ctx, dbName, null, currentPackageVersion(ctx));
-		// this.ctx = ctx;
+		mBuilder = builder;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		for(String table: mBuilder.getTables()) {
+			String sqlStr = mBuilder.getSQLCreate(table);
+			db.execSQL(sqlStr);
+		}
 		// db.execSQL(ShowplacesTable.SQL_CREATE);
 		// db.execSQL(FileInfoTable.SQL_CREATE);
 		// db.execSQL(CacheStatusTable.SQL_CREATE);
@@ -34,10 +38,14 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		for(String table: mBuilder.getTables()) {
+			String sqlStr = mBuilder.getSQLDrop(table);
+			db.execSQL(sqlStr);
+		}
 		// db.execSQL("DROP TABLE IF EXISTS " + ShowplacesTable.TABLE_NAME);
 		// db.execSQL("DROP TABLE IF EXISTS " + FileInfoTable.TABLE_NAME);
 		// db.execSQL("DROP TABLE IF EXISTS " + CacheStatusTable.TABLE_NAME);
-		// onCreate(db);
+		onCreate(db);
 	}
 
 	/**

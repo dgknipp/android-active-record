@@ -2,7 +2,9 @@ package org.kroz.activerecord;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -26,6 +28,26 @@ public class Database {
 	private String mPath;
 	private Context mContext;
 
+	static Map<String, Database> databases = new HashMap<String, Database>();
+
+	public static Database create(Context mCtx, String dbName,
+			DatabaseBuilder builder) {
+		String key = makeKey(mCtx.hashCode(), dbName);
+		Database obj;
+		obj = databases.get(key);
+		if (null == obj) {
+			obj = new Database(mCtx, dbName, builder);
+			databases.put(key, obj);
+		}
+		return obj;
+	}
+
+	static String makeKey(int hashCode, String dbName) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(hashCode).append(dbName);
+		return sb.toString();
+	}
+
 	/**
 	 * Creates a new DatabaseWrapper object
 	 * 
@@ -36,7 +58,7 @@ public class Database {
 	 *            be used to place the database on external storage if any is
 	 *            present, otherwise the context's application data directory.
 	 */
-	public Database(String dbName, Context context) {
+	Database(Context context, String dbName, DatabaseBuilder builder) {
 		String dbPath = (Environment.getExternalStorageState().equals(
 				Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
 				.getExternalStorageDirectory().getAbsolutePath(), String
@@ -45,7 +67,7 @@ public class Database {
 				mContext.getPackageName(), 0).getAbsolutePath());
 		new File(dbPath).mkdirs();
 		mPath = appendFilePath(dbPath, dbName);
-		mDbHelper = new DatabaseOpenHelper(mPath, context);
+		mDbHelper = new DatabaseOpenHelper(context, mPath, builder);
 		mContext = context;
 	}
 
@@ -291,5 +313,5 @@ public class Database {
 						.concat((append.startsWith(File.separator) ? append
 								.substring(1) : append)));
 	}
-	
+
 }

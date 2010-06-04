@@ -33,8 +33,8 @@ public class ActiveRecordBase {
 	 * @param mDbName
 	 * @param mCtx
 	 */
-	public static void connect(String dbName, Context context) {
-		s_Database = new Database(dbName, context);
+	public static void connect(Database db) {
+		s_Database = db;
 		s_Database.open();
 	}
 

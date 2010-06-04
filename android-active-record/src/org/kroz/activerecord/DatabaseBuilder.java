@@ -1,6 +1,8 @@
 package org.kroz.activerecord;
 
-import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Generates and updates ARDatabases.
@@ -14,7 +16,7 @@ import java.lang.reflect.Field;
 public class DatabaseBuilder {
 	private static int mDatabaseVersion;
 
-	
+	Map<String, Class> classes = new HashMap<String, Class>();
 	
 	/**
 	 * Create a new DatabaseBuilder for a database.
@@ -37,8 +39,9 @@ public class DatabaseBuilder {
 	 * @throws InstantiationException
 	 * @throws IllegalStateException
 	 */
-	public <T extends ActiveRecordBase> DatabaseBuilder addClass(Class<T> c) throws IllegalAccessException,
-			InstantiationException, IllegalStateException {
+	public <T extends ActiveRecordBase> DatabaseBuilder addClass(Class<T> c) {
+		classes.put(c.getName(), c);
+		
 //		if (!mUpdating)
 //			throw new IllegalStateException("Cannot modify database before initializing update.");
 //		boolean createTable = true;
@@ -83,10 +86,34 @@ public class DatabaseBuilder {
 		return this;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public String[] getTables() {
-		return null;
+		String[] ret = new String[classes.size()]; 
+		Class[] arr = new Class[classes.size()];
+		arr = classes.values().toArray(arr);
+		for(int i=0; i<arr.length; i++) {
+			Class c = arr[i];
+			ret[i] = CamelNotationHelper.toSQLName(c.getSimpleName());
+		}
+		return ret;
 	}
 //	public String[] getTables() {
 //		return null;
 //	}
+
+	/**
+	 * Returns SQL create statement for specified table
+	 */
+	public String getSQLCreate(String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * Returns SQL drop table statement for specified table
+	 */
+	public String getSQLDrop(String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

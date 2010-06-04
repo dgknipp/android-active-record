@@ -21,13 +21,14 @@ public class CamelNotationHelper {
 	 * output before ading letter
 	 * 
 	 * @param javaNotation
-	 * @return
+	 * @return SQL name translated from Java name
 	 */
-	public static String javaToSqlNotation(String javaNotation) {
+	public static String toSQLName(String javaNotation) {
 		StringBuilder sb = new StringBuilder();
 		char[] buf = javaNotation.toCharArray();
-		for (char c : buf) {
-			if (Character.isLowerCase(c)) {
+		for (int i = 0; i < buf.length; i++) {
+			char c = buf[i];
+			if (Character.isLowerCase(c) || i==0 ) {
 				sb.append(Character.toUpperCase(c));
 			} else if (Character.isUpperCase(c)) {
 				sb.append('_').append(Character.toUpperCase(c));
@@ -39,13 +40,14 @@ public class CamelNotationHelper {
 	/**
 	 * Convert name of format THIS_IS_A_NAME to thisIsAName For each letter: if
 	 * not '_' then convert to lower case and add to output string if '_' then
-	 * skip letter and add next letter to output string whithout converting to
+	 * skip letter and add next letter to output string without converting to
 	 * lower case
 	 * 
-	 * @param javaNotation
-	 * @return
+	 * @param sqlNotation
+	 * @return A name complaint with naming convention for Java methods and
+	 *         fields, converted from SQL name
 	 */
-	public static String sqlToJavaNotation(String sqlNotation) {
+	public static String toJavaMethodName(String sqlNotation) {
 		StringBuilder sb = new StringBuilder();
 		char[] buf = sqlNotation.toCharArray();
 		for (int i = 0; i < buf.length; i++) {
@@ -63,41 +65,23 @@ public class CamelNotationHelper {
 	}
 
 	/**
-	 * Convert name of format thisIsAName to THIS_IS_A_NAME For each letter: if
-	 * lower case then convert to upper case if upper case then add '_' to
-	 * output before ading letter
-	 * 
-	 * @param javaNotation
-	 * @return
-	 */
-	public String javaToSqlNotation2(String javaNotation) {
-		StringBuilder sb = new StringBuilder();
-		char[] buf = javaNotation.toCharArray();
-		for (char c : buf) {
-			if (Character.isLowerCase(c)) {
-				sb.append(Character.toUpperCase(c));
-			} else if (Character.isUpperCase(c)) {
-				sb.append('_').append(Character.toUpperCase(c));
-			}
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * Convert name of format THIS_IS_A_NAME to thisIsAName For each letter: if
+	 * Convert name of format THIS_IS_A_NAME to ThisIsAName For each letter: if
 	 * not '_' then convert to lower case and add to output string if '_' then
-	 * skip letter and add next letter to output string whithout converting to
+	 * skip letter and add next letter to output string without converting to
 	 * lower case
 	 * 
-	 * @param javaNotation
-	 * @return
+	 * @param sqlNotation
+	 * @return A name complaint with naming convention for Java classes,
+	 *         converted from SQL name
 	 */
-	public String sqlToJavaNotation2(String sqlNotation) {
+	public static String toJavaClassName(String sqlNotation) {
 		StringBuilder sb = new StringBuilder();
 		char[] buf = sqlNotation.toCharArray();
 		for (int i = 0; i < buf.length; i++) {
 			char c = buf[i];
-			if (c != '_') {
+			if (i == 0) {
+				sb.append(buf[i]);
+			} else if (c != '_') {
 				sb.append(Character.toLowerCase(c));
 			} else {
 				i++;
