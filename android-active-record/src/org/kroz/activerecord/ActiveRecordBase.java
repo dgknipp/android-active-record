@@ -1,17 +1,57 @@
 package org.kroz.activerecord;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 
-public class AREntity {
+/**
+ * 
+ * @author Vladimir Kroz (AKA vkroz)
+ * @author jeremyot
+ * 
+ *         This project based on and inspired by 'androidactiverecord' project
+ *         written by JEREMYOT
+ */
+public class ActiveRecordBase {
 
-	private static Database s_Database;
-	static ARDictionary s_Dictionary = new ARDictionary();
+	static Database s_Database;
+	static EntitiesMap s_EntitiesMap = new EntitiesMap();
+	protected boolean m_NeedsInsert = true;
+	
+	public String test() {
+		return "Hello";
+	}
+	/**
+	 * Initializes database connection
+	 * @param mDbName
+	 * @param mCtx
+	 */
+	public static void connect(String dbName, Context context) {
+		s_Database = new Database(dbName, context);
+		s_Database.open();
+	}
+
+	/**
+	 * 
+	 * @param string
+	 * @param string2
+	 * @throws IllegalAccessException 
+	 */
+	public <V> void set(String fieldName, V value) throws IllegalArgumentException, IllegalAccessException {
+		for(Field field: getColumnFields()) {
+			if(field.getName().equalsIgnoreCase("fieldName")) {
+				field.set(this, value);
+			}
+		}
+//		m_status = EntityStatus.Changed;
+	}
 
 	/**
 	 * Call this once at application launch, sets the database to use for AREntities.
@@ -24,7 +64,8 @@ public class AREntity {
 	}
 
 	protected long _id = 0;
-	protected boolean m_NeedsInsert = true;
+	protected Timestamp _created;
+	protected Timestamp _modified;
 
 	/**
 	 * This entities row id.
@@ -33,6 +74,24 @@ public class AREntity {
 	 */
 	public long getID() {
 		return _id;
+	}
+
+	/**
+	 * This entities row id.
+	 * 
+	 * @return The SQLite row id.
+	 */
+	public Timestamp getCreated() {
+		return _created;
+	}
+
+	/**
+	 * This entities row id.
+	 * 
+	 * @return The SQLite row id.
+	 */
+	public Timestamp getModified() {
+		return _modified;
 	}
 
 	/**
@@ -94,14 +153,16 @@ public class AREntity {
 		Field[] fields = getClass().getDeclaredFields();
 		List<Field> columns = new ArrayList<Field>();
 		for (Field field : fields) {
-			if (!field.getName().startsWith("m_") && !field.getName().startsWith("s_"))
+			if (!field.getName().startsWith("m_") && !field.getName().startsWith("s_")) {
 				columns.add(field);
+			}
 		}
-		if (!getClass().equals(AREntity.class)) {
-			fields = AREntity.class.getDeclaredFields();
+		if (!getClass().equals(ActiveRecordBase.class)) {
+			fields = ActiveRecordBase.class.getDeclaredFields();
 			for (Field field : fields) {
-				if (!field.getName().startsWith("m_") && !field.getName().startsWith("s_"))
+				if (!field.getName().startsWith("m_") && !field.getName().startsWith("s_")) {
 					columns.add(field);
+				}
 			}
 		}
 		return columns;
@@ -117,8 +178,8 @@ public class AREntity {
 		List<Field> columns = _id > 0 ? getColumnFields() : getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
-			if (column.getType().getSuperclass() == AREntity.class)
-				values.put(column.getName(), column.get(this) != null ? String.valueOf(((AREntity) column
+			if (column.getType().getSuperclass() == ActiveRecordBase.class)
+				values.put(column.getName(), column.get(this) != null ? String.valueOf(((ActiveRecordBase) column
 						.get(this))._id) : "0");
 			else
 				values.put(column.getName(), String.valueOf(column.get(this)));
@@ -137,8 +198,8 @@ public class AREntity {
 		List<Field> columns = getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
-			if (column.getType().getSuperclass() == AREntity.class)
-				values.put(column.getName(), column.get(this) != null ? String.valueOf(((AREntity) column
+			if (column.getType().getSuperclass() == ActiveRecordBase.class)
+				values.put(column.getName(), column.get(this) != null ? String.valueOf(((ActiveRecordBase) column
 						.get(this))._id) : "0");
 			else
 				values.put(column.getName(), String.valueOf(column.get(this)));
@@ -175,7 +236,7 @@ public class AREntity {
 			insert();
 		else
 			update();
-		s_Dictionary.set(this);
+		s_EntitiesMap.set(this);
 	}
 
 	/**
@@ -211,7 +272,7 @@ public class AREntity {
 				field.setFloat(this, cursor.getFloat(cursor.getColumnIndex(field.getName())));
 			else if (typeString.equals("short"))
 				field.setShort(this, cursor.getShort(cursor.getColumnIndex(field.getName())));
-			else if (field.getType().getSuperclass() == AREntity.class) {
+			else if (field.getType().getSuperclass() == ActiveRecordBase.class) {
 				long id = cursor.getLong(cursor.getColumnIndex(field.getName()));
 				if (id > 0)
 					entities.put(field, id);
@@ -220,9 +281,9 @@ public class AREntity {
 			} else
 				throw new IllegalArgumentException("Class cannot be read from Sqlite3 database.");
 		}
-		s_Dictionary.set(this);
+		s_EntitiesMap.set(this);
 		for (Field f : entities.keySet()) {
-			f.set(this, AREntity.findByID((Class<? extends AREntity>) f.getType(), entities.get(f)));
+			f.set(this, ActiveRecordBase.findByID((Class<? extends ActiveRecordBase>) f.getType(), entities.get(f)));
 		}
 	}
 
@@ -241,7 +302,7 @@ public class AREntity {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	public static <T extends AREntity> int delete(Class<T> type, String whereClause, String[] whereArgs)
+	public static <T extends ActiveRecordBase> int delete(Class<T> type, String whereClause, String[] whereArgs)
 			throws IllegalAccessException, InstantiationException {
 		if (s_Database == null)
 			throw new RuntimeException("Set database before using AREntities.");
@@ -264,7 +325,7 @@ public class AREntity {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	public static <T extends AREntity> int deleteByColumn(Class<T> type, String column, String value)
+	public static <T extends ActiveRecordBase> int deleteByColumn(Class<T> type, String column, String value)
 			throws IllegalAccessException, InstantiationException {
 		return delete(type, String.format("%s = ?", column), new String[] { value });
 	}
@@ -285,7 +346,7 @@ public class AREntity {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	public static <T extends AREntity> List<T> find(Class<T> type, String whereClause, String[] whereArgs)
+	public static <T extends ActiveRecordBase> List<T> find(Class<T> type, String whereClause, String[] whereArgs)
 			throws IllegalArgumentException, IllegalAccessException, InstantiationException {
 		if (s_Database == null)
 			throw new RuntimeException("Set database before using AREntities.");
@@ -294,7 +355,7 @@ public class AREntity {
 		Cursor c = s_Database.query(entity.getTableName(), null, whereClause, whereArgs);
 		try {
 			while (c.moveToNext()) {
-				entity = s_Dictionary.get(type, c.getLong(c.getColumnIndex("_id")));
+				entity = s_EntitiesMap.get(type, c.getLong(c.getColumnIndex("_id")));
 				if (entity == null) {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
@@ -327,7 +388,7 @@ public class AREntity {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	public static <T extends AREntity> List<T> find(Class<T> type, boolean distinct, String whereClause,
+	public static <T extends ActiveRecordBase> List<T> find(Class<T> type, boolean distinct, String whereClause,
 			String[] whereArgs, String orderBy, String limit) throws IllegalArgumentException,
 			IllegalAccessException, InstantiationException {
 		if (s_Database == null)
@@ -338,7 +399,7 @@ public class AREntity {
 				null, orderBy, limit);
 		try {
 			while (c.moveToNext()) {
-				entity = s_Dictionary.get(type, c.getLong(c.getColumnIndex("_id")));
+				entity = s_EntitiesMap.get(type, c.getLong(c.getColumnIndex("_id")));
 				if (entity == null) {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
@@ -368,7 +429,7 @@ public class AREntity {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	public static <T extends AREntity> List<T> findByColumn(Class<T> type, String column, String value)
+	public static <T extends ActiveRecordBase> List<T> findByColumn(Class<T> type, String column, String value)
 			throws IllegalArgumentException, IllegalAccessException, InstantiationException {
 		return find(type, String.format("%s = ?", column), new String[] { value });
 	}
@@ -386,11 +447,11 @@ public class AREntity {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	public static <T extends AREntity> T findByID(Class<T> type, long id) throws IllegalAccessException,
-			InstantiationException {
+	public static <T extends ActiveRecordBase> T findByID(Class<T> type, long id) throws IllegalAccessException,
+			InstantiationException, SQLiteException {
 		if (s_Database == null)
 			throw new RuntimeException("Set database before using AREntities.");
-		T entity = s_Dictionary.get(type, id);
+		T entity = s_EntitiesMap.get(type, id);
 		if (entity != null)
 			return entity;
 		entity = type.newInstance();
@@ -419,8 +480,15 @@ public class AREntity {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	public static <T extends AREntity> List<T> findAll(Class<T> type) throws IllegalArgumentException,
+	public static <T extends ActiveRecordBase> List<T> findAll(Class<T> type) throws IllegalArgumentException,
 			IllegalAccessException, InstantiationException {
 		return find(type, null, null);
 	}
+
 }
+
+//enum EntityStatus {
+//	Detached, 
+//	Changed, 
+//	NotChanged
+//}

@@ -13,26 +13,39 @@ import android.os.Environment;
 /**
  * Represents a database to be used by Android Active Record entities.
  * 
+ * @author Vladimir Kroz (AKA vkroz)
  * @author jeremyot
+ * 
+ *         This project based on and inspired by 'androidactiverecord' project
+ *         written by JEREMYOT
  */
 public class Database {
 
 	private SQLiteDatabase mDatabase;
+	private DatabaseOpenHelper mDbHelper;
 	private String mPath;
 	private Context mContext;
 
 	/**
-	 * Creates a new ARDatabase object
+	 * Creates a new DatabaseWrapper object
 	 * 
-	 * @param fileName
+	 * @param dbName
 	 *            The file name to use for the SQLite database.
 	 * @param context
 	 *            The context used for database creation, its package name will
 	 *            be used to place the database on external storage if any is
 	 *            present, otherwise the context's application data directory.
 	 */
-	public Database(String fileName, Context context) {
-		mPath = fileName;
+	public Database(String dbName, Context context) {
+		String dbPath = (Environment.getExternalStorageState().equals(
+				Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
+				.getExternalStorageDirectory().getAbsolutePath(), String
+				.format("android%1$sdata%1$s%2$s%1$s", File.separator, mContext
+						.getPackageName())) : mContext.getDir(
+				mContext.getPackageName(), 0).getAbsolutePath());
+		new File(dbPath).mkdirs();
+		mPath = appendFilePath(dbPath, dbName);
+		mDbHelper = new DatabaseOpenHelper(mPath, context);
 		mContext = context;
 	}
 
@@ -45,16 +58,7 @@ public class Database {
 			mDatabase.close();
 			mDatabase = null;
 		}
-		String dbPath = (Environment.getExternalStorageState().equals(
-				Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
-				.getExternalStorageDirectory().getAbsolutePath(), String
-				.format("android%1$sdata%1$s%2$s%1$s", File.separator, mContext
-						.getPackageName())) : mContext.getDir(
-				mContext.getPackageName(), 0).getAbsolutePath());
-		new File(dbPath).mkdirs();
-		mDatabase = SQLiteDatabase.openDatabase(appendFilePath(dbPath, mPath),
-				null, SQLiteDatabase.CREATE_IF_NECESSARY
-						| SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+		mDatabase = mDbHelper.getReadableDatabase();
 	}
 
 	public void close() {
@@ -264,7 +268,7 @@ public class Database {
 			return "blob";
 		if (name.equals("boolean"))
 			return "bool";
-		if (c.getSuperclass() == AREntity.class)
+		if (c.getSuperclass() == ActiveRecordBase.class)
 			return "int";
 		throw new IllegalArgumentException(
 				"Class cannot be stored in Sqlite3 database.");
@@ -287,4 +291,5 @@ public class Database {
 						.concat((append.startsWith(File.separator) ? append
 								.substring(1) : append)));
 	}
+	
 }

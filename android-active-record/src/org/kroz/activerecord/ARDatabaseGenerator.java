@@ -5,7 +5,11 @@ import java.lang.reflect.Field;
 /**
  * Generates and updates ARDatabases.
  * 
+ * @author Vladimir Kroz (AKA vkroz)
  * @author jeremyot
+ * 
+ *         This project based on and inspired by 'androidactiverecord' project
+ *         written by JEREMYOT
  */
 public class ARDatabaseGenerator {
 	private Database mDatabase;
@@ -13,6 +17,8 @@ public class ARDatabaseGenerator {
 	private boolean mUpdating = false;
 	private static int mDatabaseVersion;
 
+	
+	
 	/**
 	 * Create a new ARDatabaseGenerator for a database.
 	 * 
@@ -41,7 +47,7 @@ public class ARDatabaseGenerator {
 	 * @throws InstantiationException
 	 * @throws IllegalStateException
 	 */
-	public <T extends AREntity> void addClass(Class<T> c) throws IllegalAccessException,
+	public <T extends ActiveRecordBase> void addClass(Class<T> c) throws IllegalAccessException,
 			InstantiationException, IllegalStateException {
 		if (!mUpdating)
 			throw new IllegalStateException("Cannot modify database before initializing update.");
