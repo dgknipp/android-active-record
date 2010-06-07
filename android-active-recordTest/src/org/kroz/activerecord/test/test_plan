@@ -1,0 +1,5 @@
+Test plan
+--------------
+1) Test automatic database creation/upgrade
+2) Test CRUD operations on single Model object
+3) Test SELECT query on 'on-to-many' relationships
