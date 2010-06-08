@@ -19,19 +19,19 @@ import android.util.Log;
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
-	DatabaseBuilder mBuilder;
+	DatabaseBuilder _builder;
 
 	DatabaseOpenHelper(Context ctx, String dbName, DatabaseBuilder builder) {
 		super(ctx, dbName, null, currentPackageVersion(ctx));
-		mBuilder = builder;
+		_builder = builder;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		for (String table : mBuilder.getTables()) {
+		for (String table : _builder.getTables()) {
 			String sqlStr = null;
 			try {
-				sqlStr = mBuilder.getSQLCreate(table);
+				sqlStr = _builder.getSQLCreate(table);
 			} catch (IllegalAccessException e) {
 				Log.e(this.getClass().getName(), e.getMessage(), e);
 			} catch (InstantiationException e) {
@@ -47,8 +47,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		for (String table : mBuilder.getTables()) {
-			String sqlStr = mBuilder.getSQLDrop(table);
+		for (String table : _builder.getTables()) {
+			String sqlStr = _builder.getSQLDrop(table);
 			db.execSQL(sqlStr);
 		}
 		// db.execSQL("DROP TABLE IF EXISTS " + ShowplacesTable.TABLE_NAME);

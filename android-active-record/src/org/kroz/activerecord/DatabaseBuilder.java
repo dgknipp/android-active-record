@@ -1,23 +1,27 @@
 package org.kroz.activerecord;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.util.Log;
+
 /**
- * Generates and updates ARDatabases.
- * 
- * @author Vladimir Kroz (AKA vkroz)
- * @author jeremyot
- * 
- *         This project based on and inspired by 'androidactiverecord' project
- *         written by JEREMYOT
+ * Helper class to create/upgrade/open DB. 
+ * Can be extended by application specific builder to hide details of constructing application-specific DB 
+ * @author Vladimir Kroz (vkroz)
  */
 public class DatabaseBuilder {
-	private static int mDatabaseVersion;
 
 	Map<String, Class> classes = new HashMap<String, Class>();
+	int _dbVersion;
+	Context _ctx;
 
 	/**
 	 * Create a new DatabaseBuilder for a database.
@@ -25,10 +29,10 @@ public class DatabaseBuilder {
 	 * @param currentVersion
 	 *            The version that an up to date database would have.
 	 */
-	public DatabaseBuilder(int currentVersion) {
-		mDatabaseVersion = currentVersion;
+	public DatabaseBuilder() {
 	}
 
+	
 	/**
 	 * Add or update a table for an AREntity that is stored in the current
 	 * database.
@@ -47,7 +51,7 @@ public class DatabaseBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	public String[] getTables() {
+	String[] getTables() {
 		String[] ret = new String[classes.size()];
 		Class[] arr = new Class[classes.size()];
 		arr = classes.values().toArray(arr);
@@ -67,7 +71,7 @@ public class DatabaseBuilder {
 	 * @throws IllegalAccessException 
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends ActiveRecordBase> String getSQLCreate(String table) throws IllegalAccessException, InstantiationException {
+	<T extends ActiveRecordBase> String getSQLCreate(String table) throws IllegalAccessException, InstantiationException {
 		StringBuilder sb=null;
 		Class<T> c = getClassBySqlName(table);
 		T e = c.newInstance();
@@ -92,13 +96,15 @@ public class DatabaseBuilder {
 	 * @param table
 	 *            name in SQL notation
 	 */
-	public String getSQLDrop(String table) {
+	String getSQLDrop(String table) {
 		return "DROP TABLE IF EXISTS " + table;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Class getClassBySqlName(String table) {
 		String jName = CamelNotationHelper.toJavaClassName(table);
 		return classes.get(jName);
 	}
+	
 
 }

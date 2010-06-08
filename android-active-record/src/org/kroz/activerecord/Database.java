@@ -23,30 +23,11 @@ import android.os.Environment;
  */
 public class Database {
 
-	private SQLiteDatabase mDatabase;
-	private DatabaseOpenHelper mDbHelper;
-	private String mPath;
-	private Context mContext;
-
-	static Map<String, Database> databases = new HashMap<String, Database>();
-
-	public static Database create(Context mCtx, String dbName,
-			DatabaseBuilder builder) {
-		String key = makeKey(mCtx.hashCode(), dbName);
-		Database obj;
-		obj = databases.get(key);
-		if (null == obj) {
-			obj = new Database(mCtx, dbName, builder);
-			databases.put(key, obj);
-		}
-		return obj;
-	}
-
-	static String makeKey(int hashCode, String dbName) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(hashCode).append(dbName);
-		return sb.toString();
-	}
+	private static DatabaseBuilder s_defaultBuilder;
+	private SQLiteDatabase _database;
+	private DatabaseOpenHelper _dbHelper;
+	private String _path;
+	private Context _context;
 
 	/**
 	 * Creates a new DatabaseWrapper object
@@ -62,13 +43,21 @@ public class Database {
 		String dbPath = (Environment.getExternalStorageState().equals(
 				Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
 				.getExternalStorageDirectory().getAbsolutePath(), String
-				.format("android%1$sdata%1$s%2$s%1$s", File.separator, mContext
-						.getPackageName())) : mContext.getDir(
-				mContext.getPackageName(), 0).getAbsolutePath());
+				.format("android%1$sdata%1$s%2$s%1$s", File.separator, _context
+						.getPackageName())) : _context.getDir(
+				_context.getPackageName(), 0).getAbsolutePath());
 		new File(dbPath).mkdirs();
-		mPath = appendFilePath(dbPath, dbName);
-		mDbHelper = new DatabaseOpenHelper(context, mPath, builder);
-		mContext = context;
+		_path = appendFilePath(dbPath, dbName);
+		_dbHelper = new DatabaseOpenHelper(context, _path, builder);
+		_context = context;
+	}
+
+	public static Database create(Context mCtx, String dbName,
+			DatabaseBuilder builder) {
+		return new Database(mCtx, dbName, builder);
+	}
+	public static Database create(Context mCtx, String dbName) {
+		return new Database(mCtx, dbName, s_defaultBuilder);
 	}
 
 	/**
@@ -76,17 +65,17 @@ public class Database {
 	 * otherwise uses local storage.
 	 */
 	public void open() {
-		if (mDatabase != null && mDatabase.isOpen()) {
-			mDatabase.close();
-			mDatabase = null;
+		if (_database != null && _database.isOpen()) {
+			_database.close();
+			_database = null;
 		}
-		mDatabase = mDbHelper.getReadableDatabase();
+		_database = _dbHelper.getReadableDatabase();
 	}
 
 	public void close() {
-		if (mDatabase != null)
-			mDatabase.close();
-		mDatabase = null;
+		if (_database != null)
+			_database.close();
+		_database = null;
 	}
 
 	/**
@@ -96,7 +85,7 @@ public class Database {
 	 *            Standard SQLite compatible SQL.
 	 */
 	public void execute(String sql) {
-		mDatabase.execSQL(sql);
+		_database.execSQL(sql);
 	}
 
 	/**
@@ -109,7 +98,7 @@ public class Database {
 	 * @return The ID of the new row.
 	 */
 	public long insert(String table, ContentValues parameters) {
-		return mDatabase.insert(table, null, parameters);
+		return _database.insert(table, null, parameters);
 	}
 
 	/**
@@ -127,7 +116,7 @@ public class Database {
 	 */
 	public int update(String table, ContentValues values, String whereClause,
 			String[] whereArgs) {
-		return mDatabase.update(table, values, whereClause, whereArgs);
+		return _database.update(table, values, whereClause, whereArgs);
 	}
 
 	/**
@@ -142,7 +131,7 @@ public class Database {
 	 * @return The number of rows affected.
 	 */
 	public int delete(String table, String whereClause, String[] whereArgs) {
-		return mDatabase.delete(table, whereClause, whereArgs);
+		return _database.delete(table, whereClause, whereArgs);
 	}
 
 	/**
@@ -166,7 +155,7 @@ public class Database {
 	 * @return A cursor over the data returned.
 	 */
 	public Cursor rawQuery(String sql, String[] params) {
-		return mDatabase.rawQuery(sql, params);
+		return _database.rawQuery(sql, params);
 	}
 
 	/**
@@ -209,7 +198,7 @@ public class Database {
 	public Cursor query(boolean distinct, String table, String[] selectColumns,
 			String where, String[] whereArgs, String groupBy, String having,
 			String orderBy, String limit) {
-		return mDatabase.query(distinct, table, selectColumns, where,
+		return _database.query(distinct, table, selectColumns, where,
 				whereArgs, groupBy, having, orderBy, limit);
 	}
 
@@ -241,23 +230,23 @@ public class Database {
 	}
 
 	public int getVersion() throws Exception {
-		if (!mDatabase.isOpen())
+		if (!_database.isOpen())
 			throw new Exception("Database closed.");
-		return mDatabase.getVersion();
+		return _database.getVersion();
 	}
 
 	public void setVersion(int version) throws Exception {
-		if (!mDatabase.isOpen())
+		if (!_database.isOpen())
 			throw new Exception("Database closed.");
-		mDatabase.setVersion(version);
+		_database.setVersion(version);
 	}
 
 	public void beginTransaction() {
-		mDatabase.beginTransaction();
+		_database.beginTransaction();
 	}
 
 	public void endTransaction() {
-		mDatabase.endTransaction();
+		_database.endTransaction();
 	}
 
 	/**
@@ -312,6 +301,12 @@ public class Database {
 				: File.separator
 						.concat((append.startsWith(File.separator) ? append
 								.substring(1) : append)));
+	}
+
+	// -------------------------------------------------------------------------//
+
+	public static void setDefaultBuilder(DatabaseBuilder builder) {
+		s_defaultBuilder = builder;
 	}
 
 }
