@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.kroz.activerecord.test;
+package org.kroz.activerecord;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

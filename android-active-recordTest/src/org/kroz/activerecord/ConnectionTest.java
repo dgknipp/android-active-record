@@ -1,16 +1,18 @@
-package org.kroz.activerecord.test;
+package org.kroz.activerecord;
 
 import org.kroz.activerecord.ActiveRecordBase;
 import org.kroz.activerecord.Database;
 import org.kroz.activerecord.DatabaseBuilder;
-import org.kroz.activerecord.test.fixture.User;
-import org.kroz.activerecord.test.fixture.UserData;
+import org.kroz.activerecord.test_fixture.Showplace;
+import org.kroz.activerecord.test_fixture.ShowplaceDetail;
+import org.kroz.activerecord.test_fixture.User;
+import org.kroz.activerecord.test_fixture.UserData;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteException;
 import android.test.AndroidTestCase;
 
-public class MainAppTest extends AndroidTestCase {
+public class ConnectionTest extends AndroidTestCase {
 
 	// ----------------- Fixture START --------------------//
 	String mDbName = "test.db";
@@ -31,33 +33,37 @@ public class MainAppTest extends AndroidTestCase {
 		assertNotNull(1);
 	}
 
-	public void testAll() {
+	public void testDbConnect1() {
 		try {
-			DatabaseBuilder builder = new DatabaseBuilder(1);
-			builder.addClass(User.class).addClass(UserData.class);
+			DatabaseBuilder builder = new DatabaseBuilder();
+			builder.addClass(User.class);
+			builder.addClass(UserData.class);
+			builder.addClass(Showplace.class);
+			builder.addClass(ShowplaceDetail.class);
+			Database.setDefaultBuilder(builder);
 			
-			// Create database object instance
-			Database db = Database.create(mCtx, mDbName, builder);
-			
-			// Connect to BD
-			ActiveRecordBase.connect(db);
-			
-			// Find record - record not found
-			User usr1 = ActiveRecordBase.findByID(User.class, 1);
+			// Open DB #1 
+			Database db = Database.create(mCtx, mDbName);
+			db.open();
+			ActiveRecordBase con1 = ActiveRecordBase.connect(db); 
 
-			// Record not found - create new object, set fields
+			// Open DB #2 
+			ActiveRecordBase con2 = ActiveRecordBase.connect(mCtx, mDbName); 
+						
+			// Find record - record not found
+			User usr1 = con1.findByID(User.class, 1);
+
+			// Record not found - create new object, set fields and save in DB
 			assertNull(usr1);
-			usr1 = new User();
+			usr1 = con1.newEntity(User.class);
 			usr1.set("firstName", "John");
 			usr1.set("lastName", "Smith");
 			usr1.set("registrationDate", System.currentTimeMillis());
 			usr1.set("ssn", 1234567890);
-
-			// Save in DB
 			usr1.save();
 
 			// Now find record - record found
-			User usr2 = ActiveRecordBase.findByID(User.class, 1);
+			User usr2 = con2.findByID(User.class, 1);
 			// Compare - must be identical
 			assertTrue(usr2.equals(usr1));
 
@@ -67,17 +73,18 @@ public class MainAppTest extends AndroidTestCase {
 			assertTrue(usr2.equals(usr1));
 
 			// Save record
-			usr1.save();
+			usr2.save();
 
 			// Save record - do nothing
 			usr2.save();
 
-			// Open DB
-			ActiveRecordBase.connect(db);
+			// Close DB
+			con1.close();
+			con2.close();
 
 			// Find record, compare data with copy in memory (must be equal)
 			// Now find record - record found
-			usr2 = ActiveRecordBase.findByID(User.class, 1);
+			usr2 = con1.findByID(User.class, 1);
 
 			// Delete record
 			usr2.delete();
@@ -92,6 +99,9 @@ public class MainAppTest extends AndroidTestCase {
 		} catch (SQLiteException e) {
 			fail(e.getMessage());
 		}
+	}
+
+	public void testDbConnect2() {
 	}
 
 }

@@ -1,4 +1,4 @@
-package org.kroz.activerecord.test;
+package org.kroz.activerecord;
 
 import org.kroz.activerecord.CamelNotationHelper;
 

@@ -1,8 +1,8 @@
-package org.kroz.activerecord.test;
+package org.kroz.activerecord;
 
 import org.kroz.activerecord.DatabaseBuilder;
-import org.kroz.activerecord.test.fixture.User;
-import org.kroz.activerecord.test.fixture.UserData;
+import org.kroz.activerecord.test_fixture.User;
+import org.kroz.activerecord.test_fixture.UserData;
 
 import android.test.AndroidTestCase;
 
@@ -21,9 +21,9 @@ public class DatabaseBuilderTest extends AndroidTestCase {
 	}
 
 	public void testGetTables() {
-		DatabaseBuilder dbb = new DatabaseBuilder(1);
-		dbb.addClass(User.class).addClass(UserData.class);
-		String[] arr = dbb.getTables();
+		DatabaseBuilder builder = new DatabaseBuilder();
+		builder.addClass(User.class).addClass(UserData.class);
+		String[] arr = builder.getTables();
 		assertEquals("Expected USER_DATA but got "+arr[0], "USER_DATA", arr[0]);
 		assertEquals("Expected USER but got "+arr[1], "USER", arr[1]);
 	}

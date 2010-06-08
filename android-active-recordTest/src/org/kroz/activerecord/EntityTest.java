@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.kroz.activerecord.test;
+package org.kroz.activerecord;
 
 import org.kroz.activerecord.ActiveRecordBase;
 
@@ -25,8 +25,6 @@ public class EntityTest extends AndroidTestCase {
 	 * Test method for {@link org.kroz.activerecord.ActiveRecordBase#test()}.
 	 */
 	public void testTest() {
-		ActiveRecordBase e = new ActiveRecordBase();
-		assertEquals("Hello", e.test());
 	}
 
 }
