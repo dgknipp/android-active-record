@@ -1,9 +1,11 @@
-package org.kroz.activerecord.test_fixture;
+package org.kroz.activerecord.test.fixtures;
 
 import java.sql.Timestamp;
 
 import org.kroz.activerecord.ActiveRecordBase;
+import org.kroz.activerecord.ActiveRecordException;
 import org.kroz.activerecord.Database;
+import org.kroz.activerecord.DatabaseBuilder;
 
 /**
  * Value object representing details of local media file associated with
@@ -13,7 +15,10 @@ import org.kroz.activerecord.Database;
  */
 public class ShowplaceDetail extends ActiveRecordBase {
 
-	protected ShowplaceDetail(Database db) {
+	ShowplaceDetail() {
+		
+	}
+	public ShowplaceDetail(Database db) {
 		super(db);
 	}
 
@@ -43,9 +48,9 @@ public class ShowplaceDetail extends ActiveRecordBase {
 		ShowplaceDetail o = null;
 		try {
 			o = super.newEntity(ShowplaceDetail.class);
-		} catch (IllegalAccessException e) {
-		} catch (InstantiationException e) {
-		}
+		} catch (ActiveRecordException e) {
+			e.printStackTrace();
+		} 
 		o.copyFrom(this);
 		return o;
 	}
