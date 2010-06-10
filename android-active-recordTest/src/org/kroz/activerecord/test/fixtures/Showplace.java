@@ -16,7 +16,7 @@ import org.kroz.activerecord.DatabaseBuilder;
  * 
  */
 public class Showplace extends ActiveRecordBase {
-	Showplace() {
+	public Showplace() {
 	}
 	public Showplace(Database db) {
 		super(db);

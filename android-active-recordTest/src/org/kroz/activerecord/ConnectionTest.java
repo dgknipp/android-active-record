@@ -35,20 +35,15 @@ public class ConnectionTest extends AndroidTestCase {
 		assertNotNull(_ctx);
 	}
 
-
 	public void test1Insert() {
+		// Drop DB at the beginning of the test set
+		DatabaseHelper.dropDatabase(_ctx, _dbName);
+
 		// ----- Prepare -------
-		try {
-			DatabaseHelper.dropDatabase(_ctx, _dbName);
-			_builder = new DatabaseBuilder(TestConst.DB_NAME, 1);
-			_builder.addClass(User.class);
-			_builder.addClass(UserData.class);
-			_builder.addClass(Showplace.class);
-			_builder.addClass(ShowplaceDetail.class);
-			Database.setBuilder(_dbName, _builder);
-		} catch (ActiveRecordException e1) {
-			fail("Can't prepare testing DB");
-		}
+		_builder = new DatabaseBuilder(TestConst.DB_NAME, 1);
+		_builder.addClass(User.class);
+		_builder.addClass(UserData.class);
+		Database.setBuilder(_dbName, _builder);
 
 		// Open DB
 		try {
@@ -60,7 +55,7 @@ public class ConnectionTest extends AndroidTestCase {
 			usr1.registrationDate = new Timestamp(System.currentTimeMillis());
 			usr1.ssn = 1234567890;
 			usr1.save();
-			
+
 			List<User> u = con.findAll(User.class);
 			assertNotNull(u);
 			assertEquals(1, u.size());
@@ -71,24 +66,18 @@ public class ConnectionTest extends AndroidTestCase {
 			fail(e.getLocalizedMessage());
 		}
 
-
 	}
 
 	public void test2DbConnect2() {
-		try {
-			DatabaseHelper.dropDatabase(_ctx, _dbName);
-			_builder = new DatabaseBuilder(TestConst.DB_NAME, 2);
-			_builder.addClass(User.class);
-			_builder.addClass(UserData.class);
-			_builder.addClass(Showplace.class);
-			_builder.addClass(ShowplaceDetail.class);
-			Database.setBuilder(_dbName, _builder);
-		} catch (ActiveRecordException e1) {
-			fail("Can't prepare testing DB");
-		}
+		_builder = new DatabaseBuilder(TestConst.DB_NAME, 2);
+		_builder.addClass(User.class);
+		_builder.addClass(UserData.class);
+		_builder.addClass(Showplace.class);
+		_builder.addClass(ShowplaceDetail.class);
+		Database.setBuilder(_dbName, _builder);
 
 		try {
-			
+
 			// Open DB #1
 			Database db = Database.open(_ctx, _dbName);
 			ActiveRecordBase con1 = ActiveRecordBase.createInstance(db);
@@ -100,13 +89,14 @@ public class ConnectionTest extends AndroidTestCase {
 			// Find record - record not found
 			User usr1 = con1.findByID(User.class, 1);
 			// Record not found - create new object, set fields and save in DB
-			assertNull(usr1);
+			assertNotNull(usr1);
+			assertEquals(1234567890, usr1.ssn);
 
 			usr1 = con1.newEntity(User.class);
-			usr1.firstName = "John";
-			usr1.lastName = "Smith";
+			usr1.firstName = "Vova";
+			usr1.lastName = "Kroz";
 			usr1.registrationDate = new Timestamp(System.currentTimeMillis());
-			usr1.ssn = 1234567890;
+			usr1.ssn = 222333444;
 			usr1.save();
 
 			// Now find record - record found
@@ -116,9 +106,6 @@ public class ConnectionTest extends AndroidTestCase {
 
 			// Modify fields, copy object
 			usr1.ssn = 22222222;
-			// Compare - must be identical
-			assertTrue(usr2.equals(usr1));
-
 			// Save record
 			usr2.save();
 
@@ -129,22 +116,9 @@ public class ConnectionTest extends AndroidTestCase {
 			con1.close();
 			con2.close();
 
-			// Find record, compare data with copy in memory (must be equal)
-			// Now find record - record found
-			usr2 = con1.findByID(User.class, 1);
-
-			// Delete record
-			usr2.delete();
-
-			// Find record - not found
-
-			assert (true);
 		} catch (ActiveRecordException e) {
 			fail(e.getLocalizedMessage());
 		}
-	}
-
-	public void testDbInsert() {
 	}
 
 }

@@ -28,19 +28,7 @@ public class SchemaInitTest extends AndroidTestCase {
 	}
 
 	public void test1SchemaCreateAndAlter() {
-		// Database.setBuilder(_dbName, new DatabaseBuilder(_dbName, 1));
-		// try {
-		// Database db0 = Database.open(_ctx, _dbName);
-		// DatabaseHelper.dropAllTables(db0);
-		// db0.close();
-		// } catch (ActiveRecordException e1) {
-		// fail("Can't prepare testing DB");
-		// }
-		try {
-			DatabaseHelper.dropDatabase(_ctx, _dbName);
-		} catch (ActiveRecordException e1) {
-			fail("Can't prepare testing DB");
-		}
+		DatabaseHelper.dropDatabase(_ctx, _dbName);
 
 		DatabaseBuilder b1 = new DatabaseBuilder(_dbName, 1);
 		b1.addClass(User.class);

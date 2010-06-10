@@ -26,21 +26,9 @@ public class DatabaseHelper {
 			throw new ActiveRecordException(ErrMsg.ERR_DB_IS_NOT_OPEN);
 	}
 
-	public static boolean dropDatabase(Context ctx, String dbName)
-			throws ActiveRecordException {
-		SQLiteOpenHelper hlp = new DatabaseOpenHelper(ctx, dbName,
-				new DatabaseBuilder(dbName, 1));
-		try {
-			SQLiteDatabase db = hlp.getReadableDatabase();
-			String p = db.getPath();
-			db.close();
-			hlp.close();
-			File f = new File(p);
-			return f.delete();
-		} catch (SQLiteException e) {
-			e.printStackTrace();
-		}
-		return false;
+	public static boolean dropDatabase(Context ctx, String dbName) {
+		File f = ctx.getDatabasePath(dbName);
+		return f.delete();
 	}
 
 }

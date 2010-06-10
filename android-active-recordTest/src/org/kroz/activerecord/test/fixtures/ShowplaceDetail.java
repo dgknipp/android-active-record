@@ -15,7 +15,7 @@ import org.kroz.activerecord.DatabaseBuilder;
  */
 public class ShowplaceDetail extends ActiveRecordBase {
 
-	ShowplaceDetail() {
+	public ShowplaceDetail() {
 		
 	}
 	public ShowplaceDetail(Database db) {
