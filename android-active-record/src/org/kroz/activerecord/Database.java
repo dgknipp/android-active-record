@@ -23,7 +23,8 @@ import android.os.Environment;
  */
 public class Database {
 
-	private static DatabaseBuilder s_defaultBuilder;
+	static Map<String, DatabaseBuilder> _builders = new HashMap<String, DatabaseBuilder>();
+
 	private SQLiteDatabase _database;
 	private DatabaseOpenHelper _dbHelper;
 	private String _path;
@@ -40,24 +41,83 @@ public class Database {
 	 *            present, otherwise the context's application data directory.
 	 */
 	Database(Context context, String dbName, DatabaseBuilder builder) {
-		String dbPath = (Environment.getExternalStorageState().equals(
-				Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
-				.getExternalStorageDirectory().getAbsolutePath(), String
-				.format("android%1$sdata%1$s%2$s%1$s", File.separator, _context
-						.getPackageName())) : _context.getDir(
-				_context.getPackageName(), 0).getAbsolutePath());
-		new File(dbPath).mkdirs();
-		_path = appendFilePath(dbPath, dbName);
+		_context = context;
+		// String dbPath = (Environment.getExternalStorageState().equals(
+		// Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
+		// .getExternalStorageDirectory().getAbsolutePath(), String
+		// .format("android%1$sdata%1$s%2$s%1$s", File.separator, _context
+		// .getPackageName())) : _context.getDir(
+		// _context.getPackageName(), 0).getAbsolutePath());
+		// new File(dbPath).mkdirs();
+		_path = dbName; // temporary workaround - DB is created only on device,
+		// not SDcard
+		// _path = appendFilePath(dbPath, dbName);
 		_dbHelper = new DatabaseOpenHelper(context, _path, builder);
 		_context = context;
 	}
 
-	public static Database create(Context mCtx, String dbName,
-			DatabaseBuilder builder) {
-		return new Database(mCtx, dbName, builder);
+	/**
+	 * Creates new DB instance. Returned DB instances is not initially opened.
+	 * Calling application must explicitly open it by calling open() method
+	 * 
+	 * @param ctx
+	 * @param dbName
+	 * @return
+	 * @throws ActiveRecordException
+	 */
+	public static Database createInstance(Context ctx, String dbName)
+			throws ActiveRecordException {
+		DatabaseBuilder builder = getBuilder(dbName);
+		if (null == builder)
+			throw new ActiveRecordException(
+					"Schema wasn't initialized. Call Database.setBuilder() first");
+		return new Database(ctx, dbName, builder);
 	}
-	public static Database create(Context mCtx, String dbName) {
-		return new Database(mCtx, dbName, s_defaultBuilder);
+
+	/**
+	 * Creates and opens new DB instances. DB instance returned to calling
+	 * application already opened.
+	 * 
+	 * @param ctx
+	 * @param dbName
+	 * @return
+	 * @throws ActiveRecordException
+	 */
+	public static Database open(Context ctx, String dbName)
+			throws ActiveRecordException {
+		Database db = Database.createInstance(ctx, dbName);
+		db.open();
+		return db;
+	}
+
+	/**
+	 * Returns DatabaseBuilder object assosicted with Database
+	 * 
+	 * @param dbName
+	 *            database name
+	 * @return DatabaseBuilder object assosicted with Database
+	 */
+	public static DatabaseBuilder getBuilder(String dbName) {
+		return _builders.get(dbName);
+	}
+
+	/**
+	 * Initializes Database framework. This method must be called for each used
+	 * database only once before using database. This is required for proper
+	 * setup static attributes of the Database
+	 * 
+	 * @param context
+	 * @param dbName
+	 * @param builder
+	 * @return
+	 */
+	static public void setBuilder(String dbName, DatabaseBuilder builder) {
+		_builders.put(dbName, builder);
+	}
+
+	public static Database createInstance(Context ctx, String dbName,
+			DatabaseBuilder builder) {
+		return new Database(ctx, dbName, builder);
 	}
 
 	/**
@@ -76,6 +136,13 @@ public class Database {
 		if (_database != null)
 			_database.close();
 		_database = null;
+	}
+
+	public boolean isOpen() {
+		if (null != _database && _database.isOpen())
+			return true;
+		else
+			return false;
 	}
 
 	/**
@@ -202,7 +269,15 @@ public class Database {
 				whereArgs, groupBy, having, orderBy, limit);
 	}
 
-	public String[] getTables() {
+	/**
+	 * Returns array of database tables names
+	 * 
+	 * @throws ActiveRecordException
+	 */
+	public String[] getTables() throws ActiveRecordException {
+		if (null == _database || !_database.isOpen())
+			throw new ActiveRecordException(ErrMsg.ERR_DB_IS_NOT_OPEN);
+
 		Cursor c = query("sqlite_master", new String[] { "name" }, "type = ?",
 				new String[] { "table" });
 		List<String> tables = new ArrayList<String>();
@@ -304,9 +379,4 @@ public class Database {
 	}
 
 	// -------------------------------------------------------------------------//
-
-	public static void setDefaultBuilder(DatabaseBuilder builder) {
-		s_defaultBuilder = builder;
-	}
-
 }

@@ -4,24 +4,16 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.util.Log;
-
 /**
- * Helper class to create/upgrade/open DB. 
- * Can be extended by application specific builder to hide details of constructing application-specific DB 
+ * Helper class to create/upgrade/open DB.
+ * 
  * @author Vladimir Kroz (vkroz)
  */
 public class DatabaseBuilder {
 
 	Map<String, Class> classes = new HashMap<String, Class>();
-	int _dbVersion;
-	Context _ctx;
+	String _dbName;
+	int _version;
 
 	/**
 	 * Create a new DatabaseBuilder for a database.
@@ -29,29 +21,31 @@ public class DatabaseBuilder {
 	 * @param currentVersion
 	 *            The version that an up to date database would have.
 	 */
-	public DatabaseBuilder() {
+	public DatabaseBuilder(String dbName, int version) {
+		this._dbName = dbName;
+		this._version = version;
 	}
 
-	
 	/**
 	 * Add or update a table for an AREntity that is stored in the current
 	 * database.
 	 * 
 	 * @param <T>
-	 *            Any AREntity type.
+	 *            Any ActiveRecordBase type.
 	 * @param c
 	 *            The class to reference when updating or adding a table.
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws IllegalStateException
 	 */
-	public <T extends ActiveRecordBase> DatabaseBuilder addClass(Class<T> c) {
-		classes.put(c.getName(), c);
-		return this;
+	public <T extends ActiveRecordBase> void addClass(Class<T> c) {
+		classes.put(c.getSimpleName(), c);
 	}
 
+	/**
+	 * Returns list of DB tables according to classes added to a schema map
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
-	String[] getTables() {
+	public String[] getTables() {
 		String[] ret = new String[classes.size()];
 		Class[] arr = new Class[classes.size()];
 		arr = classes.values().toArray(arr);
@@ -67,22 +61,30 @@ public class DatabaseBuilder {
 	 * 
 	 * @param table
 	 *            name in SQL notation
-	 * @throws InstantiationException 
-	 * @throws IllegalAccessException 
+	 * @throws ActiveRecordException
 	 */
 	@SuppressWarnings("unchecked")
-	<T extends ActiveRecordBase> String getSQLCreate(String table) throws IllegalAccessException, InstantiationException {
-		StringBuilder sb=null;
+	public <T extends ActiveRecordBase> String getSQLCreate(String table)
+			throws ActiveRecordException {
+		StringBuilder sb = null;
 		Class<T> c = getClassBySqlName(table);
-		T e = c.newInstance();
+		T e = null;
+		try {
+			e = c.newInstance();
+		} catch (IllegalAccessException e1) {
+			throw new ActiveRecordException(e1.getLocalizedMessage());
+		} catch (InstantiationException e1) {
+			throw new ActiveRecordException(e1.getLocalizedMessage());
+		}
 		if (null != c) {
-			sb = new StringBuilder("CREATE TABLE ").append(table)
-					.append(" (_id integer primary key");
+			sb = new StringBuilder("CREATE TABLE ").append(table).append(
+					" (_id integer primary key");
 			for (Field column : e.getColumnFieldsWithoutID()) {
 				String jname = column.getName();
+				String qname = CamelNotationHelper.toSQLName(jname);
 				Class<?> jtype = column.getType();
 				String qtype = Database.getSQLiteTypeString(jtype);
-				sb.append(", ").append(jname).append(" ").append(qtype);
+				sb.append(", ").append(qname).append(" ").append(qtype);
 			}
 			sb.append(")");
 
@@ -96,8 +98,12 @@ public class DatabaseBuilder {
 	 * @param table
 	 *            name in SQL notation
 	 */
-	String getSQLDrop(String table) {
+	public String getSQLDrop(String table) {
 		return "DROP TABLE IF EXISTS " + table;
+	}
+
+	public String getDatabaseName() {
+		return _dbName;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -105,6 +111,9 @@ public class DatabaseBuilder {
 		String jName = CamelNotationHelper.toJavaClassName(table);
 		return classes.get(jName);
 	}
-	
+
+	public int getVersion() {
+		return _version;
+	}
 
 }

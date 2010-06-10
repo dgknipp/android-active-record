@@ -20,10 +20,12 @@ import android.util.Log;
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	DatabaseBuilder _builder;
+	int _version;
 
 	DatabaseOpenHelper(Context ctx, String dbName, DatabaseBuilder builder) {
-		super(ctx, dbName, null, currentPackageVersion(ctx));
+		super(ctx, dbName, null, builder.getVersion());
 		_builder = builder;
+		_version = _builder.getVersion();
 	}
 
 	@Override
@@ -32,14 +34,13 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			String sqlStr = null;
 			try {
 				sqlStr = _builder.getSQLCreate(table);
-			} catch (IllegalAccessException e) {
+			} catch (ActiveRecordException e) {
 				Log.e(this.getClass().getName(), e.getMessage(), e);
-			} catch (InstantiationException e) {
-				Log.e(this.getClass().getName(), e.getMessage(), e);
-			}
+			} 
 			if (sqlStr != null)
 				db.execSQL(sqlStr);
 		}
+		db.setVersion(_version);
 		// db.execSQL(ShowplacesTable.SQL_CREATE);
 		// db.execSQL(FileInfoTable.SQL_CREATE);
 		// db.execSQL(CacheStatusTable.SQL_CREATE);
@@ -56,22 +57,4 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		// db.execSQL("DROP TABLE IF EXISTS " + CacheStatusTable.TABLE_NAME);
 		onCreate(db);
 	}
-
-	/**
-	 * Returns version code of the Android application package
-	 * 
-	 * @param ctx
-	 * @return application' version code
-	 */
-	static int currentPackageVersion(Context ctx) {
-		String packageName = ctx.getPackageName();
-		try {
-			PackageInfo pi = ctx.getPackageManager().getPackageInfo(
-					packageName, 0);
-			return pi.versionCode;
-		} catch (NameNotFoundException e) {
-			return -1;
-		}
-	}
-
 }
