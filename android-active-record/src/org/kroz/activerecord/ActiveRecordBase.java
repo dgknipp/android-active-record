@@ -152,7 +152,7 @@ public class ActiveRecordBase {
 	 * @return The table name for this class.
 	 */
 	protected String getTableName() {
-		return getClass().getSimpleName();
+		return CamelNotationHelper.toSQLName(getClass().getSimpleName());
 	}
 
 	/**
@@ -264,12 +264,12 @@ public class ActiveRecordBase {
 		for (Field column : columns) {
 			try {
 				if (column.getType().getSuperclass() == ActiveRecordBase.class)
-					values.put(column.getName(),
+					values.put(CamelNotationHelper.toSQLName(column.getName()),
 							column.get(this) != null ? String
 									.valueOf(((ActiveRecordBase) column
 											.get(this))._id) : "0");
 				else
-					values.put(column.getName(), String.valueOf(column
+					values.put(CamelNotationHelper.toSQLName(column.getName()), String.valueOf(column
 							.get(this)));
 			} catch (IllegalArgumentException e) {
 				throw new ActiveRecordException("No column " + column.getName());
