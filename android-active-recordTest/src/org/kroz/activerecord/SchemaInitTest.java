@@ -18,6 +18,7 @@ public class SchemaInitTest extends AndroidTestCase {
 		super.setUp();
 		_dbName = TestConst.DB_NAME;
 		_ctx = getContext();
+		DatabaseHelper.dropDatabase(_ctx, _dbName);
 	}
 
 	protected void tearDown() throws Exception {
@@ -28,7 +29,6 @@ public class SchemaInitTest extends AndroidTestCase {
 	}
 
 	public void test1SchemaCreateAndAlter() {
-		DatabaseHelper.dropDatabase(_ctx, _dbName);
 
 		DatabaseBuilder b1 = new DatabaseBuilder(_dbName, 1);
 		b1.addClass(User.class);
