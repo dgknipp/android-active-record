@@ -12,7 +12,6 @@ import android.util.Log;
  * itself, a creation date and a modified data.
  * 
  * @author Vladimir Kroz (AKA vkroz)
- * @author jeremyot
  * 
  *         This project based on and inspired by 'androidactiverecord' project
  *         written by JEREMYOT
