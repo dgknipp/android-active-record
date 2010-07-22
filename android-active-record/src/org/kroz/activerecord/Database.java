@@ -35,12 +35,14 @@ public class Database {
 	 * 
 	 * @param dbName
 	 *            The file name to use for the SQLite database.
+	 * @param dbVersion
+	 *			  Database version 
 	 * @param context
 	 *            The context used for database creation, its package name will
 	 *            be used to place the database on external storage if any is
 	 *            present, otherwise the context's application data directory.
 	 */
-	Database(Context context, String dbName, DatabaseBuilder builder) {
+	Database(Context context, String dbName, int dbVersion, DatabaseBuilder builder) {
 		_context = context;
 		// String dbPath = (Environment.getExternalStorageState().equals(
 		// Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
@@ -52,7 +54,7 @@ public class Database {
 		_path = dbName; // temporary workaround - DB is created only on device,
 		// not SDcard
 		// _path = appendFilePath(dbPath, dbName);
-		_dbHelper = new DatabaseOpenHelper(context, _path, builder);
+		_dbHelper = new DatabaseOpenHelper(context, _path, dbVersion, builder);
 		_context = context;
 	}
 
@@ -62,16 +64,17 @@ public class Database {
 	 * 
 	 * @param ctx
 	 * @param dbName
+	 * @param dbVersion
 	 * @return
 	 * @throws ActiveRecordException
 	 */
-	public static Database createInstance(Context ctx, String dbName)
+	public static Database createInstance(Context ctx, String dbName, int dbVersion)
 			throws ActiveRecordException {
 		DatabaseBuilder builder = getBuilder(dbName);
 		if (null == builder)
 			throw new ActiveRecordException(
 					"Schema wasn't initialized. Call Database.setBuilder() first");
-		return new Database(ctx, dbName, builder);
+		return new Database(ctx, dbName, dbVersion, builder);
 	}
 
 	/**
@@ -80,12 +83,13 @@ public class Database {
 	 * 
 	 * @param ctx
 	 * @param dbName
+	 * @param dbVersion
 	 * @return
 	 * @throws ActiveRecordException
 	 */
-	public static Database open(Context ctx, String dbName)
+	public static Database open(Context ctx, String dbName, int dbVersion)
 			throws ActiveRecordException {
-		Database db = Database.createInstance(ctx, dbName);
+		Database db = Database.createInstance(ctx, dbName, dbVersion);
 		db.open();
 		return db;
 	}
@@ -115,9 +119,9 @@ public class Database {
 		_builders.put(dbName, builder);
 	}
 
-	public static Database createInstance(Context ctx, String dbName,
+	public static Database createInstance(Context ctx, String dbName, int dbVersion, 
 			DatabaseBuilder builder) {
-		return new Database(ctx, dbName, builder);
+		return new Database(ctx, dbName, dbVersion, builder);
 	}
 
 	/**

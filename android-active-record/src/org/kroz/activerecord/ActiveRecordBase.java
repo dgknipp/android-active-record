@@ -46,9 +46,9 @@ public class ActiveRecordBase {
 	 * @return
 	 * @throws ActiveRecordException
 	 */
-	static public ActiveRecordBase open(Context ctx, String dbName)
+	static public ActiveRecordBase open(Context ctx, String dbName, int dbVersion)
 			throws ActiveRecordException {
-		Database db = Database.createInstance(ctx, dbName);
+		Database db = Database.createInstance(ctx, dbName, dbVersion);
 		db.open();
 		return ActiveRecordBase.createInstance(db);
 	}

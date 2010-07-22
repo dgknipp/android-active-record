@@ -1,8 +1,6 @@
 package org.kroz.activerecord;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -21,10 +19,17 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	DatabaseBuilder _builder;
 	int _version;
 
-	DatabaseOpenHelper(Context ctx, String dbName, DatabaseBuilder builder) {
-		super(ctx, dbName, null, builder.getVersion());
+	/**
+	 * Constructor
+	 * @param ctx
+	 * @param dbPath
+	 * @param dbVersion
+	 * @param builder
+	 */
+	DatabaseOpenHelper(Context ctx, String dbPath, int dbVersion, DatabaseBuilder builder) {
+		super(ctx, dbPath, null, dbVersion);
 		_builder = builder;
-		_version = _builder.getVersion();
+		_version = dbVersion;
 	}
 
 	@Override
@@ -40,9 +45,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 				db.execSQL(sqlStr);
 		}
 		db.setVersion(_version);
-		// db.execSQL(ShowplacesTable.SQL_CREATE);
-		// db.execSQL(FileInfoTable.SQL_CREATE);
-		// db.execSQL(CacheStatusTable.SQL_CREATE);
 	}
 
 	@Override
@@ -51,9 +53,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			String sqlStr = _builder.getSQLDrop(table);
 			db.execSQL(sqlStr);
 		}
-		// db.execSQL("DROP TABLE IF EXISTS " + ShowplacesTable.TABLE_NAME);
-		// db.execSQL("DROP TABLE IF EXISTS " + FileInfoTable.TABLE_NAME);
-		// db.execSQL("DROP TABLE IF EXISTS " + CacheStatusTable.TABLE_NAME);
 		onCreate(db);
 	}
 }

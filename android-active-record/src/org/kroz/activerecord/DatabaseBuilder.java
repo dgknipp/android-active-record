@@ -13,17 +13,12 @@ public class DatabaseBuilder {
 
 	Map<String, Class> classes = new HashMap<String, Class>();
 	String _dbName;
-	int _version;
 
 	/**
 	 * Create a new DatabaseBuilder for a database.
-	 * 
-	 * @param currentVersion
-	 *            The version that an up to date database would have.
 	 */
-	public DatabaseBuilder(String dbName, int version) {
+	public DatabaseBuilder(String dbName) {
 		this._dbName = dbName;
-		this._version = version;
 	}
 
 	/**
@@ -111,9 +106,4 @@ public class DatabaseBuilder {
 		String jName = CamelNotationHelper.toJavaClassName(table);
 		return classes.get(jName);
 	}
-
-	public int getVersion() {
-		return _version;
-	}
-
 }
