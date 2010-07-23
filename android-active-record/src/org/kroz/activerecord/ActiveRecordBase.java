@@ -69,6 +69,10 @@ public class ActiveRecordBase {
 		_database.close();
 	}
 
+	/**
+	 * 
+	 * @param db
+	 */
 	protected ActiveRecordBase(Database db) {
 		_database = db;
 	}
