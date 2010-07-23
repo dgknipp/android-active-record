@@ -33,7 +33,7 @@ public class SchemaInitTest extends AndroidTestCase {
 		DatabaseBuilder b1 = new DatabaseBuilder(_dbName);
 		b1.addClass(User.class);
 		b1.addClass(UserData.class);
-		Database.setBuilder(_dbName, b1);
+		Database.setBuilder(b1);
 
 		Database db;
 		try {

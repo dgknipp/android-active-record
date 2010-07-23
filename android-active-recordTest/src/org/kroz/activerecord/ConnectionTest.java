@@ -45,7 +45,7 @@ public class ConnectionTest extends AndroidTestCase {
 		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
-		Database.setBuilder(_dbName, _builder);
+		Database.setBuilder(_builder);
 
 		// Open DB
 		try {
@@ -76,7 +76,7 @@ public class ConnectionTest extends AndroidTestCase {
 		_builder.addClass(UserData.class);
 		_builder.addClass(Showplace.class);
 		_builder.addClass(ShowplaceDetail.class);
-		Database.setBuilder(_dbName, _builder);
+		Database.setBuilder(_builder);
 
 		try {
 

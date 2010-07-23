@@ -46,7 +46,7 @@ public class EntityTest extends AndroidTestCase {
 		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
-		Database.setBuilder(_dbName, _builder);
+		Database.setBuilder(_builder);
 		System.out.println("-----blahblah----");
 	}
 
@@ -58,7 +58,7 @@ public class EntityTest extends AndroidTestCase {
 		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
-		Database.setBuilder(_dbName, _builder);
+		Database.setBuilder(_builder);
 
 		ActiveRecordBase conn = null;
 
