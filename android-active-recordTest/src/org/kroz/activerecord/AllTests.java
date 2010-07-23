@@ -14,7 +14,7 @@ import android.test.suitebuilder.TestSuiteBuilder;
 public class AllTests extends TestSuite {
 
 	/**
-	 * 
+	 * aa
 	 */
 	public AllTests() {
 	}
