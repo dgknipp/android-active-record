@@ -43,7 +43,7 @@ public class EntityTest extends AndroidTestCase {
 		// Drop DB at the beginning of the test set
 		DatabaseHelper.dropDatabase(_ctx, _dbName);
 
-		_builder = new DatabaseBuilder(TestConst.DB_NAME, 1);
+		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
 		Database.setBuilder(_dbName, _builder);
@@ -55,7 +55,7 @@ public class EntityTest extends AndroidTestCase {
 	 */
 	public void testCreateEntity() {
 
-		_builder = new DatabaseBuilder(TestConst.DB_NAME, 1);
+		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
 		Database.setBuilder(_dbName, _builder);
@@ -65,7 +65,7 @@ public class EntityTest extends AndroidTestCase {
 
 		// Open DB
 		try {
-			conn = ActiveRecordBase.open(_ctx, _dbName);
+			conn = ActiveRecordBase.open(_ctx, _dbName, 1);
 		} catch (ActiveRecordException e) {
 			fail(e.getLocalizedMessage());
 		}

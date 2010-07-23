@@ -33,7 +33,7 @@ public class DatabaseBuilderTest extends AndroidTestCase {
 	}
 
 	public void testGetTables() {
-		DatabaseBuilder builder = new DatabaseBuilder(TestConst.DB_NAME, _version);
+		DatabaseBuilder builder = new DatabaseBuilder(TestConst.DB_NAME);
 		builder.addClass(User.class);
 		builder.addClass(UserData.class);
 		builder.addClass(Showplace.class);
@@ -43,12 +43,10 @@ public class DatabaseBuilderTest extends AndroidTestCase {
 		for (String t : arr) {
 			assertTrue(t + " not found", _tables.contains(t));
 		}
-		
-		assertEquals(_version, builder.getVersion());
 	}
 
 	public void testOnUpdate() {
-		DatabaseBuilder builder = new DatabaseBuilder(TestConst.DB_NAME, _version);
+		DatabaseBuilder builder = new DatabaseBuilder(TestConst.DB_NAME);
 		builder.addClass(User.class);
 		builder.addClass(UserData.class);
 		builder.addClass(Showplace.class);
@@ -60,7 +58,7 @@ public class DatabaseBuilderTest extends AndroidTestCase {
 	}
 
 	public void testOnCreate() {
-		DatabaseBuilder builder = new DatabaseBuilder(TestConst.DB_NAME, _version);
+		DatabaseBuilder builder = new DatabaseBuilder(TestConst.DB_NAME);
 		builder.addClass(User.class);
 		builder.addClass(UserData.class);
 		builder.addClass(Showplace.class);

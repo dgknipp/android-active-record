@@ -16,6 +16,7 @@ public class ConnectionTest extends AndroidTestCase {
 
 	// ----------------- Fixture START --------------------//
 	String _dbName;
+	int _dbVersion;
 	Context _ctx;
 	DatabaseBuilder _builder;
 
@@ -23,6 +24,7 @@ public class ConnectionTest extends AndroidTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		_dbName = TestConst.DB_NAME;
+		_dbVersion = TestConst.DB_VERSION1;
 		_ctx = getContext();
 	}
 
@@ -40,14 +42,14 @@ public class ConnectionTest extends AndroidTestCase {
 		DatabaseHelper.dropDatabase(_ctx, _dbName);
 
 		// ----- Prepare -------
-		_builder = new DatabaseBuilder(TestConst.DB_NAME, 1);
+		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
 		Database.setBuilder(_dbName, _builder);
 
 		// Open DB
 		try {
-			ActiveRecordBase con = ActiveRecordBase.open(_ctx, _dbName);
+			ActiveRecordBase con = ActiveRecordBase.open(_ctx, _dbName, _dbVersion);
 
 			User usr1 = con.newEntity(User.class);
 			usr1.firstName = "John";
@@ -69,7 +71,7 @@ public class ConnectionTest extends AndroidTestCase {
 	}
 
 	public void test2DbConnect2() {
-		_builder = new DatabaseBuilder(TestConst.DB_NAME, 2);
+		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
 		_builder.addClass(Showplace.class);
@@ -79,12 +81,12 @@ public class ConnectionTest extends AndroidTestCase {
 		try {
 
 			// Open DB #1
-			Database db = Database.open(_ctx, _dbName);
+			Database db = Database.open(_ctx, _dbName, _dbVersion);
 			ActiveRecordBase con1 = ActiveRecordBase.createInstance(db);
 			con1.open();
 
 			// Open DB #2
-			ActiveRecordBase con2 = ActiveRecordBase.open(_ctx, _dbName);
+			ActiveRecordBase con2 = ActiveRecordBase.open(_ctx, _dbName, _dbVersion);
 
 			// Find record - record not found
 			User usr1 = con1.findByID(User.class, 1);

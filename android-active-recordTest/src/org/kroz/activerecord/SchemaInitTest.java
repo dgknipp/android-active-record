@@ -30,14 +30,14 @@ public class SchemaInitTest extends AndroidTestCase {
 
 	public void test1SchemaCreateAndAlter() {
 
-		DatabaseBuilder b1 = new DatabaseBuilder(_dbName, 1);
+		DatabaseBuilder b1 = new DatabaseBuilder(_dbName);
 		b1.addClass(User.class);
 		b1.addClass(UserData.class);
 		Database.setBuilder(_dbName, b1);
 
 		Database db;
 		try {
-			db = Database.createInstance(_ctx, _dbName);
+			db = Database.createInstance(_ctx, _dbName, 1);
 			db.open();
 			String[] actual = db.getTables();
 			String[] expected = { "USER", "USER_DATA", "android_metadata" };
