@@ -1,6 +1,5 @@
 package org.kroz.activerecord;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +9,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
 
 /**
  * Represents a database to be used by Android Active Record entities.
@@ -28,6 +26,7 @@ public class Database {
 	private SQLiteDatabase _database;
 	private DatabaseOpenHelper _dbHelper;
 	private String _path;
+	@SuppressWarnings("unused")
 	private Context _context;
 
 	/**
@@ -110,13 +109,11 @@ public class Database {
 	 * database only once before using database. This is required for proper
 	 * setup static attributes of the Database
 	 * 
-	 * @param context
-	 * @param dbName
 	 * @param builder
 	 * @return
 	 */
-	static public void setBuilder(String dbName, DatabaseBuilder builder) {
-		_builders.put(dbName, builder);
+	static public void setBuilder(DatabaseBuilder builder) {
+		_builders.put(builder.getDatabaseName(), builder);
 	}
 
 	public static Database createInstance(Context ctx, String dbName, int dbVersion, 
@@ -364,23 +361,23 @@ public class Database {
 				"Class cannot be stored in Sqlite3 database.");
 	}
 
-	/**
-	 * Append to a file path, takes extra or missing separator characters into
-	 * account.
-	 * 
-	 * @param path
-	 *            The root path.
-	 * @param append
-	 *            What to add.
-	 * @return The new path.
-	 */
-	private static String appendFilePath(String path, String append) {
-		return path.concat(path.endsWith(File.separator) ? (append
-				.startsWith(File.separator) ? append.substring(1) : append)
-				: File.separator
-						.concat((append.startsWith(File.separator) ? append
-								.substring(1) : append)));
-	}
+//	/**
+//	 * Append to a file path, takes extra or missing separator characters into
+//	 * account.
+//	 * 
+//	 * @param path
+//	 *            The root path.
+//	 * @param append
+//	 *            What to add.
+//	 * @return The new path.
+//	 */
+//	private static String appendFilePath(String path, String append) {
+//		return path.concat(path.endsWith(File.separator) ? (append
+//				.startsWith(File.separator) ? append.substring(1) : append)
+//				: File.separator
+//						.concat((append.startsWith(File.separator) ? append
+//								.substring(1) : append)));
+//	}
 
 	// -------------------------------------------------------------------------//
 }

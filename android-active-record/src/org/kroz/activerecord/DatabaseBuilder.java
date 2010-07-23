@@ -11,6 +11,7 @@ import java.util.Map;
  */
 public class DatabaseBuilder {
 
+	@SuppressWarnings("unchecked")
 	Map<String, Class> classes = new HashMap<String, Class>();
 	String _dbName;
 

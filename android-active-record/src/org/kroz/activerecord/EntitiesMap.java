@@ -32,6 +32,7 @@ class EntitiesMap {
 		map.put(key, new WeakReference<ActiveRecordBase>(e));
 	}
 	
+	@SuppressWarnings("unchecked")
 	private String makeKey(Class entityType, long id) {
 		StringBuilder sb = new StringBuilder();
 		sb	.append(entityType.getName())
