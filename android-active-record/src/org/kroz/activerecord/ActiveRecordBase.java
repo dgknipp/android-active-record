@@ -582,7 +582,7 @@ public class ActiveRecordBase {
 	 *            The class of the entity to return.
 	 * @param id
 	 *            The desired ID.
-	 * @return The matching entity.
+	 * @return The matching entity if reocrd found in DB, null otherwise
 	 * @throws ActiveRecordException
 	 */
 	public <T extends ActiveRecordBase> T findByID(Class<T> type, long id)
