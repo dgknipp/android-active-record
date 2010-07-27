@@ -76,15 +76,15 @@ public class EntitiesHelper {
 		}
 		
 		if (srcIsAR && dstIsAR){
-			((ActiveRecordBase)dst).id = ((ActiveRecordBase)src).id; 
+			((ActiveRecordBase)dst)._id = ((ActiveRecordBase)src)._id; 
 		}
 		else if( srcIsAR && dstHasId) {
-			((ActiveRecordBase)dst).id = ((ActiveRecordBase)src).id; 
+			((ActiveRecordBase)dst)._id = ((ActiveRecordBase)src)._id; 
 		}
 		else if( srcHasId && dstIsAR) {
 			try {
 				Field id = src.getClass().getField("id");
-				((ActiveRecordBase)dst).id = id.getLong(src);
+				((ActiveRecordBase)dst)._id = id.getLong(src);
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
