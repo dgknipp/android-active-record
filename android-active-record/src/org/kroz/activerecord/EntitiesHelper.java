@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.Hashtable;
 
 public class EntitiesHelper {
+	private static final String AR_BASE_CLASS_NAME = ActiveRecordBase.class
+			.getSimpleName();
 
 	/**
 	 * Copies all fields from src to dst which have the same name and type
@@ -18,11 +20,12 @@ public class EntitiesHelper {
 
 		// Build list of fields in target object
 		Hashtable<String, Field> dstFields = new Hashtable<String, Field>();
+
 		for (Field field : dst.getClass().getFields()) {
 			dstFields.put(field.getName(), field);
 		}
-
-		copyFieldsData(dst, src, dstFields);
+		copyPkFields(dst, src, dstFields);
+		copyDataFields(dst, src, dstFields);
 
 		return dst;
 	}
@@ -37,39 +40,94 @@ public class EntitiesHelper {
 	 * @param src
 	 * @return
 	 */
-	static public <T1, T2> T1 copyFieldsWithoutId(T1 dst, T2 src) {
+	static public <T1, T2> T1 copyFieldsWithoutID(T1 dst, T2 src) {
 
 		// Build list of fields in target object
 		Hashtable<String, Field> dstFields = new Hashtable<String, Field>();
 		for (Field field : dst.getClass().getFields()) {
-			String name = field.getName();
-			
-			// Skip 'id' and '_id' fields
-			if(name.equalsIgnoreCase("id")||name.equalsIgnoreCase("_id"))
-				continue;
-			
 			dstFields.put(field.getName(), field);
 		}
-
-		copyFieldsData(dst, src, dstFields);
+		copyDataFields(dst, src, dstFields);
 
 		return dst;
 	}
 
-	private static <T2, T1> void copyFieldsData(T1 dst, T2 src,
+	/**
+	 * Copies ID field. If dst or src are subclasses of ActiveRecordBase, then
+	 * copies id fields of parent class
+	 * 
+	 * @param <T2>
+	 * @param <T1>
+	 * @param dst
+	 * @param src
+	 * @param dstFields
+	 */
+	private static <T2, T1> void copyPkFields(T1 dst, T2 src,
+			Hashtable<String, Field> dstFields) {
+		boolean srcIsAR = (src.getClass().getSuperclass().getSimpleName().equals(AR_BASE_CLASS_NAME))? true: false;
+		boolean dstIsAR = (dst.getClass().getSuperclass().getSimpleName().equals(AR_BASE_CLASS_NAME))? true: false;
+		boolean dstHasId = (dstFields.containsKey("id")) ? true : false;
+		boolean srcHasId=false;
+		for (Field field : src.getClass().getFields()) {
+			if(field.getName().equals("id")) {
+				srcHasId=true;
+				break;
+			}
+		}
+		
+		if (srcIsAR && dstIsAR){
+			((ActiveRecordBase)dst).id = ((ActiveRecordBase)src).id; 
+		}
+		else if( srcIsAR && dstHasId) {
+			((ActiveRecordBase)dst).id = ((ActiveRecordBase)src).id; 
+		}
+		else if( srcHasId && dstIsAR) {
+			try {
+				Field id = src.getClass().getField("id");
+				((ActiveRecordBase)dst).id = id.getLong(src);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchFieldException e) {
+				e.printStackTrace();
+			}
+		}
+		else if( srcHasId && dstHasId) {
+			try {
+				Field srcId = src.getClass().getField("id");
+				Field dstId = dst.getClass().getField("id");
+				dstId.setLong(dst, srcId.getLong(src));
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchFieldException e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+
+	private static <T2, T1> void copyDataFields(T1 dst, T2 src,
 			Hashtable<String, Field> dstFields) {
 		// Iterate through fields of source object
 		for (Field srcField : src.getClass().getFields()) {
 
 			try {
+				String srcFieldName = srcField.getName();
 
 				// If destination object has field corresponding with the field
 				// in source object
 				// Then copy value from source field to destination
-				if (dstFields.contains(srcField.getName())) {
+				if (dstFields.containsKey(srcFieldName)) {
 
 					// Get destination field from list
-					Field dstField = dstFields.get(srcField.getName());
+					Field dstField = dstFields.get(srcFieldName);
 
 					// Additional check - fields should have similar type
 					String srcFldTypeName = srcField.getType().getSimpleName();
@@ -113,7 +171,6 @@ public class EntitiesHelper {
 				e.printStackTrace();
 			}
 		}
+
 	}
-
-
 }

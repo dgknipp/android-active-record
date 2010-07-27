@@ -139,7 +139,7 @@ public class ActiveRecordBase {
 		_database = database;
 	}
 
-	protected long _id = 0;
+	protected long id = 0;
 
 	/**
 	 * This entities row id.
@@ -147,7 +147,7 @@ public class ActiveRecordBase {
 	 * @return The SQLite row id.
 	 */
 	public long getID() {
-		return _id;
+		return id;
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class ActiveRecordBase {
 	}
 
 	/**
-	 * Get this class's fields without _id.
+	 * Get this class's fields without id.
 	 * 
 	 * @return An array of fields for this class.
 	 */
@@ -233,7 +233,7 @@ public class ActiveRecordBase {
 	 * @throws ActiveRecordException
 	 */
 	private void insert() throws ActiveRecordException {
-		List<Field> columns = _id > 0 ? getColumnFields()
+		List<Field> columns = id > 0 ? getColumnFields()
 				: getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
@@ -242,7 +242,7 @@ public class ActiveRecordBase {
 					values.put(CamelNotationHelper.toSQLName(column.getName()),
 							column.get(this) != null ? String
 									.valueOf(((ActiveRecordBase) column
-											.get(this))._id) : "0");
+											.get(this)).id) : "0");
 				else
 					values.put(CamelNotationHelper.toSQLName(column.getName()), String.valueOf(column
 							.get(this)));
@@ -250,8 +250,8 @@ public class ActiveRecordBase {
 				throw new ActiveRecordException(e.getLocalizedMessage());
 			}
 		}
-		_id = _database.insert(getTableName(), values);
-		if(-1 != _id)
+		id = _database.insert(getTableName(), values);
+		if(-1 != id)
 			m_NeedsInsert = false;
 		else
 			throw new ActiveRecordException(ErrMsg.ERR_INSERT_FAILED);
@@ -271,7 +271,7 @@ public class ActiveRecordBase {
 					values.put(CamelNotationHelper.toSQLName(column.getName()),
 							column.get(this) != null ? String
 									.valueOf(((ActiveRecordBase) column
-											.get(this))._id) : "0");
+											.get(this)).id) : "0");
 				else
 					values.put(CamelNotationHelper.toSQLName(column.getName()), String.valueOf(column
 							.get(this)));
@@ -282,7 +282,7 @@ public class ActiveRecordBase {
 			}
 		}
 		_database.update(getTableName(), values, "_id = ?",
-				new String[] { String.valueOf(_id) });
+				new String[] { String.valueOf(id) });
 	}
 
 	/**
@@ -296,8 +296,8 @@ public class ActiveRecordBase {
 		if (_database == null)
 			throw new ActiveRecordException("Set database first");
 		boolean toRet = _database.delete(getTableName(), "_id = ?",
-				new String[] { String.valueOf(_id) }) != 0;
-		_id = 0;
+				new String[] { String.valueOf(id) }) != 0;
+		id = 0;
 		m_NeedsInsert = true;
 		return toRet;
 	}
