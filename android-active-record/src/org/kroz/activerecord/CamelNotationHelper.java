@@ -26,14 +26,35 @@ public class CamelNotationHelper {
 	public static String toSQLName(String javaNotation) {
 		StringBuilder sb = new StringBuilder();
 		char[] buf = javaNotation.toCharArray();
+
 		for (int i = 0; i < buf.length; i++) {
+			char prevChar = (i > 0) ? buf[i - 1] : 0;
 			char c = buf[i];
-			if (Character.isLowerCase(c) || i==0 ) {
+			char nextChar = (i < buf.length - 1) ? buf[i + 1] : 0;
+			boolean isFirstChar = (i == 0) ? true : false;
+
+			// "AbCd"->"AB_CD"
+			// "ABCd"->"AB_CD"
+			// "AbCD"->"AB_CD"
+			// "ShowplaceDetailsVO"->"SHOWPLACE_DETAILS_VO"
+			if (isFirstChar || Character.isLowerCase(c)) {
 				sb.append(Character.toUpperCase(c));
 			} else if (Character.isUpperCase(c)) {
-				sb.append('_').append(Character.toUpperCase(c));
+				if (Character.isLetterOrDigit(prevChar)) {
+					if (Character.isLowerCase(prevChar)) {
+						sb.append('_').append(Character.toUpperCase(c));
+					} else if (nextChar > 0 && Character.isLowerCase(nextChar)) {
+						sb.append('_').append(Character.toUpperCase(c));
+					} else {
+						sb.append(c);
+					}
+				}
+				else {
+					sb.append(c);
+				}				
 			}
 		}
+
 		return sb.toString();
 	}
 
@@ -48,20 +69,23 @@ public class CamelNotationHelper {
 	 *         fields, converted from SQL name
 	 */
 	public static String toJavaMethodName(String sqlNotation) {
-		StringBuilder sb = new StringBuilder();
-		char[] buf = sqlNotation.toCharArray();
-		for (int i = 0; i < buf.length; i++) {
-			char c = buf[i];
-			if (c != '_') {
-				sb.append(Character.toLowerCase(c));
+		StringBuilder dest = new StringBuilder();
+		char[] src = sqlNotation.toCharArray();
+		
+		for (int i = 0; i < src.length; i++) {
+			char c = src[i];
+			boolean isFirstChar = (i == 0) ? true : false;
+			
+			if (isFirstChar || c != '_') {
+				dest.append(Character.toLowerCase(c));
 			} else {
 				i++;
-				if (i < buf.length) {
-					sb.append(buf[i]);
+				if (i < src.length) {
+					dest.append(src[i]);
 				}
 			}
 		}
-		return sb.toString();
+		return dest.toString();
 	}
 
 	/**

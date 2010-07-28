@@ -6,6 +6,7 @@ import java.util.Hashtable;
 public class EntitiesHelper {
 	private static final String AR_BASE_CLASS_NAME = ActiveRecordBase.class
 			.getSimpleName();
+	private static final String AR_PK_FIELD_JAVA_NAME = "id";
 
 	/**
 	 * Copies all fields from src to dst which have the same name and type
@@ -20,12 +21,18 @@ public class EntitiesHelper {
 
 		// Build list of fields in target object
 		Hashtable<String, Field> dstFields = new Hashtable<String, Field>();
-
 		for (Field field : dst.getClass().getFields()) {
 			dstFields.put(field.getName(), field);
 		}
-		copyPkFields(dst, src, dstFields);
-		copyDataFields(dst, src, dstFields);
+		
+		// Build list of fields in source object
+		Hashtable<String, Field> srcFields = new Hashtable<String, Field>();
+		for (Field field : src.getClass().getFields()) {
+			srcFields.put(field.getName(), field);
+		}
+		
+		copyPkFields(dst, src, dstFields, srcFields);
+		copyDataFields(dst, src, dstFields, srcFields);
 
 		return dst;
 	}
@@ -47,7 +54,14 @@ public class EntitiesHelper {
 		for (Field field : dst.getClass().getFields()) {
 			dstFields.put(field.getName(), field);
 		}
-		copyDataFields(dst, src, dstFields);
+
+		// Build list of fields in source object
+		Hashtable<String, Field> srcFields = new Hashtable<String, Field>();
+		for (Field field : src.getClass().getFields()) {
+			srcFields.put(field.getName(), field);
+		}
+		
+		copyDataFields(dst, src, dstFields, srcFields);
 
 		return dst;
 	}
@@ -63,17 +77,11 @@ public class EntitiesHelper {
 	 * @param dstFields
 	 */
 	private static <T2, T1> void copyPkFields(T1 dst, T2 src,
-			Hashtable<String, Field> dstFields) {
+			Hashtable<String, Field> dstFields, Hashtable<String, Field> srcFields) {
 		boolean srcIsAR = (src.getClass().getSuperclass().getSimpleName().equals(AR_BASE_CLASS_NAME))? true: false;
 		boolean dstIsAR = (dst.getClass().getSuperclass().getSimpleName().equals(AR_BASE_CLASS_NAME))? true: false;
-		boolean dstHasId = (dstFields.containsKey("id")) ? true : false;
-		boolean srcHasId=false;
-		for (Field field : src.getClass().getFields()) {
-			if(field.getName().equals("id")) {
-				srcHasId=true;
-				break;
-			}
-		}
+		boolean dstHasId = (dstFields.containsKey(AR_PK_FIELD_JAVA_NAME)) ? true : false;
+		boolean srcHasId = (srcFields.containsKey(AR_PK_FIELD_JAVA_NAME)) ? true : false;
 		
 		if (srcIsAR && dstIsAR){
 			((ActiveRecordBase)dst)._id = ((ActiveRecordBase)src)._id; 
@@ -114,12 +122,15 @@ public class EntitiesHelper {
 	}
 
 	private static <T2, T1> void copyDataFields(T1 dst, T2 src,
-			Hashtable<String, Field> dstFields) {
+			Hashtable<String, Field> dstFields, Hashtable<String, Field> srcFields) {
 		// Iterate through fields of source object
-		for (Field srcField : src.getClass().getFields()) {
+		for (Field srcField : srcFields.values()) {
 
 			try {
 				String srcFieldName = srcField.getName();
+				//Skip ID field - it's copied by special method
+				if(srcFieldName.equalsIgnoreCase("id"))
+					continue;
 
 				// If destination object has field corresponding with the field
 				// in source object
