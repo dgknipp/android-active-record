@@ -24,6 +24,9 @@ public class CamelNotationHelper {
 	 * @return SQL name translated from Java name
 	 */
 	public static String toSQLName(String javaNotation) {
+		if(javaNotation.equalsIgnoreCase("_id"))
+			return "_id";
+		
 		StringBuilder sb = new StringBuilder();
 		char[] buf = javaNotation.toCharArray();
 

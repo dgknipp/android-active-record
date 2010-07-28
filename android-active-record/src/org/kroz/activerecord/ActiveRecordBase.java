@@ -1,6 +1,7 @@
 package org.kroz.activerecord;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ public class ActiveRecordBase {
 	static EntitiesMap s_EntitiesMap = new EntitiesMap();
 
 	boolean m_NeedsInsert = true;
-	Database _database;
+	Database m_Database;
 
 	/**
 	 * Creates new ActiveRecord instance. Returned instances is not initially
@@ -46,8 +47,8 @@ public class ActiveRecordBase {
 	 * @return
 	 * @throws ActiveRecordException
 	 */
-	static public ActiveRecordBase open(Context ctx, String dbName, int dbVersion)
-			throws ActiveRecordException {
+	static public ActiveRecordBase open(Context ctx, String dbName,
+			int dbVersion) throws ActiveRecordException {
 		Database db = Database.createInstance(ctx, dbName, dbVersion);
 		db.open();
 		return ActiveRecordBase.createInstance(db);
@@ -59,14 +60,14 @@ public class ActiveRecordBase {
 	 * @throws ActiveRecordException
 	 */
 	public void open() throws ActiveRecordException {
-		_database.open();
+		m_Database.open();
 	}
 
 	/**
 	 * Closes ActiveRecord object and associated underlying database
 	 */
 	public void close() {
-		_database.close();
+		m_Database.close();
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class ActiveRecordBase {
 	 * @param db
 	 */
 	protected ActiveRecordBase(Database db) {
-		_database = db;
+		m_Database = db;
 	}
 
 	protected ActiveRecordBase() {
@@ -93,7 +94,7 @@ public class ActiveRecordBase {
 		T entity = null;
 		try {
 			entity = type.newInstance();
-			entity.setDatabase(_database);
+			entity.setDatabase(m_Database);
 		} catch (IllegalAccessException e) {
 			throw new ActiveRecordException("Can't instantiate "
 					+ type.getClass());
@@ -136,7 +137,7 @@ public class ActiveRecordBase {
 	 *            The database to use.
 	 */
 	public void setDatabase(Database database) {
-		_database = database;
+		m_Database = database;
 	}
 
 	protected long _id = 0;
@@ -244,14 +245,14 @@ public class ActiveRecordBase {
 									.valueOf(((ActiveRecordBase) column
 											.get(this))._id) : "0");
 				else
-					values.put(CamelNotationHelper.toSQLName(column.getName()), String.valueOf(column
-							.get(this)));
+					values.put(CamelNotationHelper.toSQLName(column.getName()),
+							String.valueOf(column.get(this)));
 			} catch (IllegalAccessException e) {
 				throw new ActiveRecordException(e.getLocalizedMessage());
 			}
 		}
-		_id = _database.insert(getTableName(), values);
-		if(-1 != _id)
+		_id = m_Database.insert(getTableName(), values);
+		if (-1 != _id)
 			m_NeedsInsert = false;
 		else
 			throw new ActiveRecordException(ErrMsg.ERR_INSERT_FAILED);
@@ -273,15 +274,15 @@ public class ActiveRecordBase {
 									.valueOf(((ActiveRecordBase) column
 											.get(this))._id) : "0");
 				else
-					values.put(CamelNotationHelper.toSQLName(column.getName()), String.valueOf(column
-							.get(this)));
+					values.put(CamelNotationHelper.toSQLName(column.getName()),
+							String.valueOf(column.get(this)));
 			} catch (IllegalArgumentException e) {
 				throw new ActiveRecordException("No column " + column.getName());
 			} catch (IllegalAccessException e) {
 				throw new ActiveRecordException("No column " + column.getName());
 			}
 		}
-		_database.update(getTableName(), values, "_id = ?",
+		m_Database.update(getTableName(), values, "_id = ?",
 				new String[] { String.valueOf(_id) });
 	}
 
@@ -293,9 +294,9 @@ public class ActiveRecordBase {
 	 * @throws IllegalAccessException
 	 */
 	public boolean delete() throws ActiveRecordException {
-		if (_database == null)
+		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
-		boolean toRet = _database.delete(getTableName(), "_id = ?",
+		boolean toRet = m_Database.delete(getTableName(), "_id = ?",
 				new String[] { String.valueOf(_id) }) != 0;
 		_id = 0;
 		m_NeedsInsert = true;
@@ -308,9 +309,9 @@ public class ActiveRecordBase {
 	 * @throws ActiveRecordException
 	 */
 	public void save() throws ActiveRecordException {
-		if (_database == null)
+		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
-		if (m_NeedsInsert)
+		if (null == findByID(this.getClass(), _id))
 			insert();
 		else
 			update();
@@ -332,35 +333,44 @@ public class ActiveRecordBase {
 		for (Field field : getColumnFields()) {
 			try {
 				String typeString = field.getType().getName();
-				if (typeString.equals("long"))
+				String colName = CamelNotationHelper.toSQLName(field.getName());
+				if (typeString.equals("long")) {
 					field.setLong(this, cursor.getLong(cursor
-							.getColumnIndex(field.getName())));
+							.getColumnIndex(colName)));
+				}
 				else if (typeString.equals("java.lang.String")) {
-					String val = cursor.getString(cursor.getColumnIndex(field
-							.getName()));
+					String val = cursor.getString(cursor.getColumnIndex(colName));
 					field.set(this, val.equals("null") ? null : val);
-				} else if (typeString.equals("double"))
+				} else if (typeString.equals("double")) {
 					field.setDouble(this, cursor.getDouble(cursor
-							.getColumnIndex(field.getName())));
-				else if (typeString.equals("boolean"))
+							.getColumnIndex(colName)));
+				}
+				else if (typeString.equals("boolean")) {
 					field.setBoolean(this, cursor.getString(
-							cursor.getColumnIndex(field.getName())).equals(
+							cursor.getColumnIndex(colName)).equals(
 							"true"));
-				else if (typeString.equals("[B"))
-					field.set(this, cursor.getBlob(cursor.getColumnIndex(field
-							.getName())));
-				else if (typeString.equals("int"))
+				}
+				else if (typeString.equals("[B")) {
+					field.set(this, cursor.getBlob(cursor.getColumnIndex(colName)));
+				}
+				else if (typeString.equals("int")) {
 					field.setInt(this, cursor.getInt(cursor
-							.getColumnIndex(field.getName())));
-				else if (typeString.equals("float"))
+							.getColumnIndex(colName)));
+				}
+				else if (typeString.equals("float")) { 
 					field.setFloat(this, cursor.getFloat(cursor
-							.getColumnIndex(field.getName())));
-				else if (typeString.equals("short"))
+							.getColumnIndex(colName)));
+				}
+				else if (typeString.equals("short")) {
 					field.setShort(this, cursor.getShort(cursor
-							.getColumnIndex(field.getName())));
+							.getColumnIndex(colName)));
+				}
+				else if (typeString.equals("java.sql.Timestamp")) {
+					long l = cursor.getLong(cursor.getColumnIndex(colName));
+					field.set(this, new Timestamp(l));
+				}
 				else if (field.getType().getSuperclass() == ActiveRecordBase.class) {
-					long id = cursor.getLong(cursor.getColumnIndex(field
-							.getName()));
+					long id = cursor.getLong(cursor.getColumnIndex(colName));
 					if (id > 0)
 						entities.put(field, id);
 					else
@@ -409,7 +419,7 @@ public class ActiveRecordBase {
 	public <T extends ActiveRecordBase> int delete(Class<T> type,
 			String whereClause, String[] whereArgs)
 			throws ActiveRecordException {
-		if (_database == null)
+		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
 		T entity;
 		try {
@@ -419,7 +429,7 @@ public class ActiveRecordBase {
 		} catch (InstantiationException e) {
 			throw new ActiveRecordException(e.getLocalizedMessage());
 		}
-		return _database.delete(entity.getTableName(), whereClause, whereArgs);
+		return m_Database.delete(entity.getTableName(), whereClause, whereArgs);
 	}
 
 	/**
@@ -462,7 +472,7 @@ public class ActiveRecordBase {
 	public <T extends ActiveRecordBase> List<T> find(Class<T> type,
 			String whereClause, String[] whereArgs)
 			throws ActiveRecordException {
-		if (_database == null)
+		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
 		T entity = null;
 		try {
@@ -473,7 +483,7 @@ public class ActiveRecordBase {
 			throw new ActiveRecordException(e1.getLocalizedMessage());
 		}
 		List<T> toRet = new ArrayList<T>();
-		Cursor c = _database.query(entity.getTableName(), null, whereClause,
+		Cursor c = m_Database.query(entity.getTableName(), null, whereClause,
 				whereArgs);
 		try {
 			while (c.moveToNext()) {
@@ -518,7 +528,7 @@ public class ActiveRecordBase {
 	public <T extends ActiveRecordBase> List<T> find(Class<T> type,
 			boolean distinct, String whereClause, String[] whereArgs,
 			String orderBy, String limit) throws ActiveRecordException {
-		if (_database == null)
+		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
 		T entity;
 		try {
@@ -529,7 +539,7 @@ public class ActiveRecordBase {
 			throw new ActiveRecordException(e.getLocalizedMessage());
 		}
 		List<T> toRet = new ArrayList<T>();
-		Cursor c = _database.query(distinct, entity.getTableName(), null,
+		Cursor c = m_Database.query(distinct, entity.getTableName(), null,
 				whereClause, whereArgs, null, null, orderBy, limit);
 		try {
 			while (c.moveToNext()) {
@@ -587,11 +597,12 @@ public class ActiveRecordBase {
 	 */
 	public <T extends ActiveRecordBase> T findByID(Class<T> type, long id)
 			throws ActiveRecordException {
-		if (_database == null)
+		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
 		T entity = s_EntitiesMap.get(type, id);
 		if (entity != null)
 			return entity;
+
 		try {
 			entity = type.newInstance();
 		} catch (IllegalAccessException e) {
@@ -599,13 +610,16 @@ public class ActiveRecordBase {
 		} catch (InstantiationException e) {
 			throw new ActiveRecordException(e.getLocalizedMessage());
 		}
-		entity.m_NeedsInsert = false;
-		Cursor c = _database.query(entity.getTableName(), null, "_id = ?",
+
+		Cursor c = m_Database.query(entity.getTableName(), null, "_id = ?",
 				new String[] { String.valueOf(id) });
 		try {
-			if (!c.moveToNext())
+			if (!c.moveToNext()) {
 				return null;
-			entity.inflate(c);
+			} else {
+				entity.inflate(c);
+				entity.m_NeedsInsert = false;
+			}
 		} finally {
 			c.close();
 		}
