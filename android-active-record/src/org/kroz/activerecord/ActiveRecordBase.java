@@ -493,6 +493,8 @@ public class ActiveRecordBase {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
 					entity.inflate(c);
+					entity.m_Database = m_Database;
+					
 				}
 				toRet.add(entity);
 			}
@@ -549,6 +551,8 @@ public class ActiveRecordBase {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
 					entity.inflate(c);
+					entity.m_Database = m_Database;
+					
 				}
 				toRet.add(entity);
 			}
@@ -619,6 +623,7 @@ public class ActiveRecordBase {
 			} else {
 				entity.inflate(c);
 				entity.m_NeedsInsert = false;
+				entity.m_Database = m_Database;
 			}
 		} finally {
 			c.close();
