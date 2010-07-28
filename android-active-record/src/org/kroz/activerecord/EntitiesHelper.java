@@ -87,7 +87,18 @@ public class EntitiesHelper {
 			((ActiveRecordBase)dst)._id = ((ActiveRecordBase)src)._id; 
 		}
 		else if( srcIsAR && dstHasId) {
-			((ActiveRecordBase)dst)._id = ((ActiveRecordBase)src)._id; 
+			try {
+				Field dstId = dst.getClass().getField("id");
+				dstId.setLong(dst, ((ActiveRecordBase)src)._id);
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchFieldException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
 		}
 		else if( srcHasId && dstIsAR) {
 			try {
