@@ -45,7 +45,7 @@ public class EntitiesHelperTest extends AndroidTestCase {
 		assertEquals(pojo.bbb, ar.bbb);
 		assertEquals(pojo.ddd, ar.ddd);
 		assertNotSame(pojo.ccc, ar.ccc);
-		assertEquals(pojo.id, ar.id);
+		assertEquals(pojo.id, ar._id);
 	}
 
 
