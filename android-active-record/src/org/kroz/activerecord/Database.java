@@ -163,7 +163,7 @@ public class Database {
 	 *            The table to insert into.
 	 * @param parameters
 	 *            The data.
-	 * @return The ID of the new row.
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred.
 	 */
 	public long insert(String table, ContentValues parameters) {
 		return _database.insert(table, null, parameters);

@@ -18,6 +18,14 @@ public class EntitiesHelper {
 	 * @return
 	 */
 	static public <T1, T2> T1 copyFields(T1 dst, T2 src) {
+		if(null==src) {
+			System.err.println(EntitiesHelper.class.getName()+" error: null source object");
+			return null; 
+		}
+		if(null==src) {
+			System.err.println(EntitiesHelper.class.getName()+" error: null destination object");
+			return null; 
+		}
 
 		// Build list of fields in target object
 		Hashtable<String, Field> dstFields = new Hashtable<String, Field>();
@@ -48,7 +56,15 @@ public class EntitiesHelper {
 	 * @return
 	 */
 	static public <T1, T2> T1 copyFieldsWithoutID(T1 dst, T2 src) {
-
+		if(null==src) {
+			System.err.println(EntitiesHelper.class.getName()+" error: null source object");
+			return null; 
+		}
+		if(null==src) {
+			System.err.println(EntitiesHelper.class.getName()+" error: null destination object");
+			return null; 
+		}
+		
 		// Build list of fields in target object
 		Hashtable<String, Field> dstFields = new Hashtable<String, Field>();
 		for (Field field : dst.getClass().getFields()) {

@@ -230,10 +230,10 @@ public class ActiveRecordBase {
 
 	/**
 	 * Insert this entity into the database.
-	 * 
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred 
 	 * @throws ActiveRecordException
 	 */
-	private void insert() throws ActiveRecordException {
+	private long insert() throws ActiveRecordException {
 		List<Field> columns = _id > 0 ? getColumnFields()
 				: getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
@@ -254,16 +254,16 @@ public class ActiveRecordBase {
 		_id = m_Database.insert(getTableName(), values);
 		if (-1 != _id)
 			m_NeedsInsert = false;
-		else
-			throw new ActiveRecordException(ErrMsg.ERR_INSERT_FAILED);
+		
+		return _id;
 	}
 
 	/**
 	 * Update this entity in the database.
-	 * 
+	 * @return The number of rows affected
 	 * @throws NoSuchFieldException
 	 */
-	private void update() throws ActiveRecordException {
+	private int update() throws ActiveRecordException {
 		List<Field> columns = getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
@@ -282,8 +282,9 @@ public class ActiveRecordBase {
 				throw new ActiveRecordException("No column " + column.getName());
 			}
 		}
-		m_Database.update(getTableName(), values, "_id = ?",
+		int r = m_Database.update(getTableName(), values, "_id = ?",
 				new String[] { String.valueOf(_id) });
+		return r;
 	}
 
 	/**
@@ -308,14 +309,19 @@ public class ActiveRecordBase {
 	 * 
 	 * @throws ActiveRecordException
 	 */
-	public void save() throws ActiveRecordException {
+	public long save() throws ActiveRecordException {
+		long r = -1;
+
 		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
+		
 		if (null == findByID(this.getClass(), _id))
-			insert();
+			r = insert();
 		else
-			update();
+			r = update();
 		s_EntitiesMap.set(this);
+		
+		return r;
 	}
 
 	/**
