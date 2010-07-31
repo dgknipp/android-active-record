@@ -12,9 +12,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 
 /**
- * 
+ * Base class for tables entities  
  * @author Vladimir Kroz (AKA vkroz)
- * @author jeremyot
  * 
  *         This project based on and inspired by 'androidactiverecord' project
  *         written by JEREMYOT

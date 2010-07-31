@@ -3,6 +3,11 @@ package org.kroz.activerecord;
 import java.lang.reflect.Field;
 import java.util.Hashtable;
 
+/**
+ * Provides convenience methods to handle entites and corresponding classes
+ * @author Vladimir Kroz (AKA vkroz)
+ *
+ */
 public class EntitiesHelper {
 	private static final String AR_BASE_CLASS_NAME = ActiveRecordBase.class
 			.getSimpleName();
@@ -22,7 +27,7 @@ public class EntitiesHelper {
 			System.err.println(EntitiesHelper.class.getName()+" error: null source object");
 			return null; 
 		}
-		if(null==src) {
+		if(null==dst) {
 			System.err.println(EntitiesHelper.class.getName()+" error: null destination object");
 			return null; 
 		}
@@ -60,7 +65,7 @@ public class EntitiesHelper {
 			System.err.println(EntitiesHelper.class.getName()+" error: null source object");
 			return null; 
 		}
-		if(null==src) {
+		if(null==dst) {
 			System.err.println(EntitiesHelper.class.getName()+" error: null destination object");
 			return null; 
 		}
