@@ -305,7 +305,7 @@ public class ActiveRecordBase {
 
 	/**
 	 * Saves this entity to the database, inserts or updates as needed.
-	 * 
+	 * @return number of rows affected on success, -1 on failure
 	 * @throws ActiveRecordException
 	 */
 	public long save() throws ActiveRecordException {
