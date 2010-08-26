@@ -53,12 +53,9 @@ public class EntitiesHelper {
 	/**
 	 * Copies all fields from src to dst which have the same name and type,
 	 * except id or _id field
-	 * 
-	 * @param <T1>
-	 * @param <T2>
-	 * @param dst
-	 * @param src
-	 * @return
+	 * @param dst destination object
+	 * @param src source object
+	 * @return populated destination object on success, null otherwise
 	 */
 	static public <T1, T2> T1 copyFieldsWithoutID(T1 dst, T2 src) {
 		if(null==src) {
