@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.kroz.activerecord.utils.ARConst;
+import org.kroz.activerecord.utils.Logg;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -266,6 +269,10 @@ public class Database {
 	public Cursor query(boolean distinct, String table, String[] selectColumns,
 			String where, String[] whereArgs, String groupBy, String having,
 			String orderBy, String limit) {
+		final String LOG_PREFIX = Database.class.getSimpleName() + ".query()";
+		if(null==_database) {
+			Logg.e(ARConst.TAG, "(%t) %s: Illegal situation - database object is null!!!", LOG_PREFIX);
+		}
 		return _database.query(distinct, table, selectColumns, where,
 				whereArgs, groupBy, having, orderBy, limit);
 	}

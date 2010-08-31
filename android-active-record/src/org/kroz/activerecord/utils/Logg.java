@@ -11,8 +11,6 @@ import android.util.Log;
  */
 public class Logg {
 
-	static String[] idents = { "", " ", "  ", "   ", "    ", "     ", "      ",
-			"       ", "        ", "         " };
 
 	static int _startIdentLevel = -1;
 
@@ -145,4 +143,24 @@ public class Logg {
 		return Thread.currentThread().getId();
 	}
 
+	static String[] idents = { 
+		"", 
+		" ", 
+		"  ", 
+		"   ", 
+		"    ", 
+		"     ", 
+		"      ",
+		"       ", 
+		"        ", 
+		"         ", 
+		"          ", 
+		"           ", 
+		"            ", 
+		"             ", 
+		"              ", 
+		"               " 
+		};
+
+	
 }
