@@ -652,9 +652,3 @@ public class ActiveRecordBase {
 	}
 
 }
-
-// enum EntityStatus {
-// Detached,
-// Changed,
-// NotChanged
-// }
