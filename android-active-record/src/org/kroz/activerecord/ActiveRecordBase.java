@@ -232,7 +232,7 @@ public class ActiveRecordBase {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred 
 	 * @throws ActiveRecordException
 	 */
-	private long insert() throws ActiveRecordException {
+	public long insert() throws ActiveRecordException {
 		List<Field> columns = _id > 0 ? getColumnFields()
 				: getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
@@ -262,7 +262,7 @@ public class ActiveRecordBase {
 	 * @return The number of rows affected
 	 * @throws NoSuchFieldException
 	 */
-	private int update() throws ActiveRecordException {
+	public int update() throws ActiveRecordException {
 		List<Field> columns = getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
