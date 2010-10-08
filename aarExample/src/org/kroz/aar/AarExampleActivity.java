@@ -3,6 +3,7 @@ package org.kroz.aar;
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -28,6 +29,8 @@ public class AarExampleActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.example_activity);
         
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, DUMMY));
@@ -54,4 +57,8 @@ public class AarExampleActivity extends ListActivity {
    public void populateDb(View v) {
     	Toast.makeText(this, "Under construction", Toast.LENGTH_LONG).show();
     }
+   
+   public void finishActivity(View view) {
+	     finish();
+	 }
 }

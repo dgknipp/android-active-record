@@ -5,20 +5,19 @@ import java.sql.Timestamp;
 import org.kroz.activerecord.ActiveRecordBase;
 
 /**
- * User entity. Represents record stored in SQLite database
+ * User entity. Example entity. Class name corresponds to a database table;
+ * class attributes correspond to table fields.
  * 
  * @author Vladimir Kroz
  * 
  */
 public class User extends ActiveRecordBase {
-	public String name;
-	public String location;
-	public String status;
-	public String address;
-	public String phone;
-	public String workHours;
-	public Timestamp created;
-	public Timestamp modified;
+	public String firstName;
+	public String lastName;
+	public double balanse;
+	public int age;
+	public boolean active;
+	public Timestamp birthday;
 
 	public User() {
 	}

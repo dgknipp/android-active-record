@@ -4,11 +4,20 @@
 	android:layout_height="fill_parent" android:paddingRight="8dp"
 	android:paddingLeft="8dp">
 
+	<RelativeLayout android:id="@+id/RelativeLayout01"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:background="#CCC">
+    
+	<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/Button03" android:text="&lt; Back" android:onClick="finishActivity"/>
+		<LinearLayout android:id="@+id/LinearLayout02" android:layout_toRightOf="@+id/Button03" android:orientation="horizontal" android:gravity="center" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_centerVertical="true"><TextView android:layout_width="wrap_content" android:id="@+id/TextView01" android:textAppearance="?android:attr/textAppearanceMediumInverse" android:layout_height="wrap_content" android:text="Basic CRUD operations"/></LinearLayout>
+	
+</RelativeLayout>
+
 	<ListView android:id="@id/android:list" android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:layout_weight="1"
 		android:drawSelectorOnTop="false">
 
-</ListView>
+	</ListView>
 
 	<LinearLayout android:id="@+id/LinearLayout01"
 		android:layout_height="wrap_content" android:orientation="horizontal"
@@ -16,17 +25,16 @@
 		android:padding="5dp">
 
 		<Button android:id="@+id/Button01" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:lines="2"
-			android:width="100dp" android:text="Add   record" android:onClick="addRecord"/>
+			android:layout_height="wrap_content" android:lines="2" android:width="100dp"
+			android:text="Add   record" android:onClick="addRecord" />
 
 		<Button android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:lines="2"
-			android:width="100dp" android:id="@+id/Button02" android:text="Delete record" android:onClick="deleteRecord"/>
+			android:layout_height="wrap_content" android:lines="2" android:width="100dp"
+			android:id="@+id/Button02" android:text="Delete record"
+			android:onClick="deleteRecord" />
 
-		<Button android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:lines="2"
-			android:width="100dp" android:id="@+id/Button03" android:text="Populate DB" android:onClick="populateDb"/>
+
 	</LinearLayout>
 
-	
+
 </LinearLayout>
