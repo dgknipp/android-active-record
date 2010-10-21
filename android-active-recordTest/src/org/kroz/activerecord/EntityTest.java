@@ -21,6 +21,7 @@ import android.test.AndroidTestCase;
 public class EntityTest extends AndroidTestCase {
 
 	// ----------------- Fixture START --------------------//
+	int counter;
 	String _dbName;
 	Context _ctx;
 	DatabaseBuilder _builder;
@@ -30,6 +31,10 @@ public class EntityTest extends AndroidTestCase {
 		super.setUp();
 		_dbName = TestConst.DB_NAME;
 		_ctx = getContext();
+		_builder = new DatabaseBuilder(TestConst.DB_NAME);
+		_builder.addClass(User.class);
+		_builder.addClass(UserData.class);
+		Database.setBuilder(_builder);
 	}
 	
 	protected void tearDown() throws Exception {
@@ -39,29 +44,8 @@ public class EntityTest extends AndroidTestCase {
 	/**
 	 * Test method for {@link org.kroz.activerecord.ActiveRecordBase#test()}.
 	 */
-	public void testSetupDatabase() {
-		// Drop DB at the beginning of the test set
-		DatabaseHelper.dropDatabase(_ctx, _dbName);
-
-		_builder = new DatabaseBuilder(TestConst.DB_NAME);
-		_builder.addClass(User.class);
-		_builder.addClass(UserData.class);
-		Database.setBuilder(_builder);
-		System.out.println("-----blahblah----");
-	}
-
-	/**
-	 * Test method for {@link org.kroz.activerecord.ActiveRecordBase#test()}.
-	 */
 	public void testCreateEntity() {
-
-		_builder = new DatabaseBuilder(TestConst.DB_NAME);
-		_builder.addClass(User.class);
-		_builder.addClass(UserData.class);
-		Database.setBuilder(_builder);
-
 		ActiveRecordBase conn = null;
-
 
 		// Open DB
 		try {
@@ -90,22 +74,17 @@ public class EntityTest extends AndroidTestCase {
 			fail(e.getLocalizedMessage());
 		}
 
-		// Close DB
-		conn.close();
-
-		
+		// Find all records
 		try {
-			
 			List<User> u = conn.findAll(User.class);
 			assertNotNull(u);
-			assertEquals(1, u.size());
-
-			// Close DB
-			conn.close();
+			assertEquals(2, u.size());
 		} catch (ActiveRecordException e) {
 			fail(e.getLocalizedMessage());
 		}
 
-	}
+		// Close DB
+		conn.close();
 
+	}
 }

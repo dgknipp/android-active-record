@@ -102,9 +102,9 @@ public class ConnectionTest extends AndroidTestCase {
 			usr1.save();
 
 			// Now find record - record found
-			User usr2 = con2.findByID(User.class, 1);
+			User usr2 = con2.findByID(User.class, usr1._id);
 			// Compare - must be identical
-			assertTrue(usr2.equals(usr1));
+			assertEquals(usr2._id, usr1._id);
 
 			// Modify fields, copy object
 			usr1.ssn = 22222222;
