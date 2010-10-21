@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,18 +13,26 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 
 /**
- * Base class for tables entities  
+ * Base class for tables entities
+ * 
  * @author Vladimir Kroz (AKA vkroz)
+ * @author eduyayo@gmail.com
  * 
  *         This project based on and inspired by 'androidactiverecord' project
  *         written by JEREMYOT
  */
+// TODO use properties instead of fields????
 public class ActiveRecordBase {
 
 	static EntitiesMap s_EntitiesMap = new EntitiesMap();
 
 	boolean m_NeedsInsert = true;
 	Database m_Database;
+	// these'll cache all column data so there's no recalculation
+	static Map<String, String[]> s_columnsWithoutID = new HashMap<String, String[]>();
+	static Map<String, String[]> s_columns = new HashMap<String, String[]>();
+	static Map<String, List<Field>> s_columnFieldsWithoutID = new HashMap<String, List<Field>>();
+	static Map<String, List<Field>> s_columnFields = new HashMap<String, List<Field>>();
 
 	/**
 	 * Creates new ActiveRecord instance. Returned instances is not initially
@@ -165,11 +174,15 @@ public class ActiveRecordBase {
 	 * @return An array of the columns in this class's table.
 	 */
 	protected String[] getColumnsWithoutID() {
-		List<String> columns = new ArrayList<String>();
-		for (Field field : getColumnFieldsWithoutID()) {
-			columns.add(field.getName());
+		String name = getTableName();
+		if (s_columnsWithoutID.get(name) == null) {
+			List<String> columns = new ArrayList<String>();
+			for (Field field : getColumnFieldsWithoutID()) {
+				columns.add(field.getName());
+			}
+			s_columnsWithoutID.put(name, columns.toArray(new String[0]));
 		}
-		return columns.toArray(new String[0]);
+		return s_columnsWithoutID.get(name);
 	}
 
 	/**
@@ -178,11 +191,15 @@ public class ActiveRecordBase {
 	 * @return An array of the columns in this class's table.
 	 */
 	protected String[] getColumns() {
-		List<String> columns = new ArrayList<String>();
-		for (Field field : getColumnFields()) {
-			columns.add(field.getName());
+		String name = getTableName();
+		if (s_columns.get(name) == null) {
+			List<String> columns = new ArrayList<String>();
+			for (Field field : getColumnFields()) {
+				columns.add(field.getName());
+			}
+			s_columns.put(name, columns.toArray(new String[0]));
 		}
-		return columns.toArray(new String[0]);
+		return s_columns.get(name);
 	}
 
 	/**
@@ -191,14 +208,18 @@ public class ActiveRecordBase {
 	 * @return An array of fields for this class.
 	 */
 	protected List<Field> getColumnFieldsWithoutID() {
-		Field[] fields = getClass().getDeclaredFields();
-		List<Field> columns = new ArrayList<Field>();
-		for (Field field : fields) {
-			if (!field.getName().startsWith("m_")
-					&& !field.getName().startsWith("s_"))
-				columns.add(field);
+		String name = getTableName();
+		if (s_columnFieldsWithoutID.get(name) == null) {
+			Field[] fields = getClass().getDeclaredFields();
+			List<Field> columns = new ArrayList<Field>();
+			for (Field field : fields) {
+				if (!field.getName().startsWith("m_")
+						&& !field.getName().startsWith("s_"))
+					columns.add(field);
+			}
+			s_columnFieldsWithoutID.put(name, columns);
 		}
-		return columns;
+		return s_columnFieldsWithoutID.get(name);
 	}
 
 	/**
@@ -207,29 +228,34 @@ public class ActiveRecordBase {
 	 * @return An array of fields for this class.
 	 */
 	protected List<Field> getColumnFields() {
-		Field[] fields = getClass().getDeclaredFields();
-		List<Field> columns = new ArrayList<Field>();
-		for (Field field : fields) {
-			if (!field.getName().startsWith("m_")
-					&& !field.getName().startsWith("s_")) {
-				columns.add(field);
-			}
-		}
-		if (!getClass().equals(ActiveRecordBase.class)) {
-			fields = ActiveRecordBase.class.getDeclaredFields();
+		String name = getTableName();
+		if (s_columnFields.get(name) == null) {
+			Field[] fields = getClass().getDeclaredFields();
+			List<Field> columns = new ArrayList<Field>();
 			for (Field field : fields) {
 				if (!field.getName().startsWith("m_")
 						&& !field.getName().startsWith("s_")) {
 					columns.add(field);
 				}
 			}
+			if (!getClass().equals(ActiveRecordBase.class)) {
+				fields = ActiveRecordBase.class.getDeclaredFields();
+				for (Field field : fields) {
+					if (!field.getName().startsWith("m_")
+							&& !field.getName().startsWith("s_")) {
+						columns.add(field);
+					}
+				}
+			}
+			s_columnFields.put(name, columns);
 		}
-		return columns;
+		return s_columnFields.get(name);
 	}
 
 	/**
 	 * Insert this entity into the database.
-	 * @return the row ID of the newly inserted row, or -1 if an error occurred 
+	 * 
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 * @throws ActiveRecordException
 	 */
 	public long insert() throws ActiveRecordException {
@@ -238,14 +264,21 @@ public class ActiveRecordBase {
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
 			try {
-				if (column.getType().getSuperclass() == ActiveRecordBase.class)
-					values.put(CamelNotationHelper.toSQLName(column.getName()),
+				// Let the fields run free!!
+				// I've initialized all fields to true but when got here they
+				// were still private
+				// so added this line
+				column.setAccessible(true);
+				if (column.getType().getSuperclass() == ActiveRecordBase.class) {
+					values.put(
+							CamelNotationHelper.toSQLName(column.getName()),
 							column.get(this) != null ? String
 									.valueOf(((ActiveRecordBase) column
 											.get(this))._id) : "0");
-				else
+				} else {
 					values.put(CamelNotationHelper.toSQLName(column.getName()),
 							String.valueOf(column.get(this)));
+				}
 			} catch (IllegalAccessException e) {
 				throw new ActiveRecordException(e.getLocalizedMessage());
 			}
@@ -253,12 +286,13 @@ public class ActiveRecordBase {
 		_id = m_Database.insert(getTableName(), values);
 		if (-1 != _id)
 			m_NeedsInsert = false;
-		
+
 		return _id;
 	}
 
 	/**
 	 * Update this entity in the database.
+	 * 
 	 * @return The number of rows affected
 	 * @throws NoSuchFieldException
 	 */
@@ -267,8 +301,14 @@ public class ActiveRecordBase {
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
 			try {
+				// Let the fields run free!!
+				// I've initialized all fields to true but when got here they
+				// were still private
+				// so added this line
+				column.setAccessible(true);
 				if (column.getType().getSuperclass() == ActiveRecordBase.class)
-					values.put(CamelNotationHelper.toSQLName(column.getName()),
+					values.put(
+							CamelNotationHelper.toSQLName(column.getName()),
 							column.get(this) != null ? String
 									.valueOf(((ActiveRecordBase) column
 											.get(this))._id) : "0");
@@ -305,6 +345,7 @@ public class ActiveRecordBase {
 
 	/**
 	 * Saves this entity to the database, inserts or updates as needed.
+	 * 
 	 * @return number of rows affected on success, -1 on failure
 	 * @throws ActiveRecordException
 	 */
@@ -313,13 +354,13 @@ public class ActiveRecordBase {
 
 		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
-		
+
 		if (null == findByID(this.getClass(), _id))
 			r = insert();
 		else
 			r = update();
 		s_EntitiesMap.set(this);
-		
+
 		return r;
 	}
 
@@ -337,44 +378,43 @@ public class ActiveRecordBase {
 		HashMap<Field, Long> entities = new HashMap<Field, Long>();
 		for (Field field : getColumnFields()) {
 			try {
+				// Let the fields run free!!
+				// I've initialized all fields to true but when got here they
+				// were still private
+				// so added this line
+				field.setAccessible(true);
 				String typeString = field.getType().getName();
 				String colName = CamelNotationHelper.toSQLName(field.getName());
 				if (typeString.equals("long")) {
-					field.setLong(this, cursor.getLong(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("java.lang.String")) {
-					String val = cursor.getString(cursor.getColumnIndex(colName));
+					field.setLong(this,
+							cursor.getLong(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("java.lang.String")) {
+					String val = cursor.getString(cursor
+							.getColumnIndex(colName));
 					field.set(this, val.equals("null") ? null : val);
 				} else if (typeString.equals("double")) {
-					field.setDouble(this, cursor.getDouble(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("boolean")) {
-					field.setBoolean(this, cursor.getString(
-							cursor.getColumnIndex(colName)).equals(
-							"true"));
-				}
-				else if (typeString.equals("[B")) {
-					field.set(this, cursor.getBlob(cursor.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("int")) {
-					field.setInt(this, cursor.getInt(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("float")) { 
-					field.setFloat(this, cursor.getFloat(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("short")) {
-					field.setShort(this, cursor.getShort(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("java.sql.Timestamp")) {
+					field.setDouble(this,
+							cursor.getDouble(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("boolean")) {
+					field.setBoolean(this,
+							cursor.getString(cursor.getColumnIndex(colName))
+									.equals("true"));
+				} else if (typeString.equals("[B")) {
+					field.set(this,
+							cursor.getBlob(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("int")) {
+					field.setInt(this,
+							cursor.getInt(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("float")) {
+					field.setFloat(this,
+							cursor.getFloat(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("short")) {
+					field.setShort(this,
+							cursor.getShort(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("java.sql.Timestamp")) {
 					long l = cursor.getLong(cursor.getColumnIndex(colName));
 					field.set(this, new Timestamp(l));
-				}
-				else if (field.getType().getSuperclass() == ActiveRecordBase.class) {
+				} else if (field.getType().getSuperclass() == ActiveRecordBase.class) {
 					long id = cursor.getLong(cursor.getColumnIndex(colName));
 					if (id > 0)
 						entities.put(field, id);
@@ -394,8 +434,9 @@ public class ActiveRecordBase {
 		s_EntitiesMap.set(this);
 		for (Field f : entities.keySet()) {
 			try {
-				f.set(this, this.findByID((Class<? extends ActiveRecordBase>) f
-						.getType(), entities.get(f)));
+				f.set(this, this.findByID(
+						(Class<? extends ActiveRecordBase>) f.getType(),
+						entities.get(f)));
 			} catch (SQLiteException e) {
 				throw new ActiveRecordException(e.getLocalizedMessage());
 			} catch (IllegalArgumentException e) {
@@ -492,14 +533,14 @@ public class ActiveRecordBase {
 				whereArgs);
 		try {
 			while (c.moveToNext()) {
-				entity = s_EntitiesMap.get(type, c.getLong(c
-						.getColumnIndex("_id")));
+				entity = s_EntitiesMap.get(type,
+						c.getLong(c.getColumnIndex("_id")));
 				if (entity == null) {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
 					entity.inflate(c);
 					entity.m_Database = m_Database;
-					
+
 				}
 				toRet.add(entity);
 			}
@@ -550,14 +591,14 @@ public class ActiveRecordBase {
 				whereClause, whereArgs, null, null, orderBy, limit);
 		try {
 			while (c.moveToNext()) {
-				entity = s_EntitiesMap.get(type, c.getLong(c
-						.getColumnIndex("_id")));
+				entity = s_EntitiesMap.get(type,
+						c.getLong(c.getColumnIndex("_id")));
 				if (entity == null) {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
 					entity.inflate(c);
 					entity.m_Database = m_Database;
-					
+
 				}
 				toRet.add(entity);
 			}
@@ -649,6 +690,91 @@ public class ActiveRecordBase {
 	public <T extends ActiveRecordBase> List<T> findAll(Class<T> type)
 			throws ActiveRecordException {
 		return find(type, null, null);
+	}
+
+	/**
+	 * Return instances of an entity from the database by example.
+	 * 
+	 * @param <T>
+	 *            Any ActiveRecordBase class.
+	 * @param type
+	 *            The class of the entities to return.
+	 * @return A generic list of all matching entities.
+	 * @throws ActiveRecordException
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends ActiveRecordBase> List<T> findByExampleSkipZeros(
+			ActiveRecordBase example) throws ActiveRecordException {
+		Class<T> type = (Class<T>) example.getClass();
+		List<String> fields = new ArrayList<String>();
+		List<String> values = new ArrayList<String>();
+		for (Field field : example.getColumnFields()) {
+			Object value;
+			try {
+				value = field.get(example);
+			} catch (Exception e) {
+				continue;
+			}
+			String typeString = field.getType().getName();
+			if (value != null) {
+				if (typeString.equals("long")) {
+					if (((Long) value) != 0L) {
+						fields.add(CamelNotationHelper.toSQLName(field
+								.getName()));
+						values.add(value.toString());
+					}
+				} else if (typeString.equals("java.lang.String")) {
+					if (!value.toString().equals("")) {
+						fields.add(CamelNotationHelper.toSQLName(field
+								.getName()));
+						values.add(value.toString());
+					}
+				} else if (typeString.equals("double")) {
+					if (((Double) value) != 0.0D) {
+						fields.add(CamelNotationHelper.toSQLName(field
+								.getName()));
+						values.add(value.toString());
+					}
+				} else if (typeString.equals("boolean")) {
+					fields.add(CamelNotationHelper.toSQLName(field.getName()));
+					values.add(value.toString());
+				} else if (typeString.equals("[B")) {
+				} else if (typeString.equals("int")) {
+					if (((Integer) value) != 0) {
+						fields.add(CamelNotationHelper.toSQLName(field
+								.getName()));
+						values.add(value.toString());
+					}
+				} else if (typeString.equals("float")) {
+					if (((Float) value) != 0.0F) {
+						fields.add(CamelNotationHelper.toSQLName(field
+								.getName()));
+						values.add(value.toString());
+					}
+				} else if (typeString.equals("short")) {
+					if (((Short) value) != 0) {
+						fields.add(CamelNotationHelper.toSQLName(field
+								.getName()));
+						values.add(value.toString());
+					}
+				} else if (typeString.equals("java.sql.Timestamp")) {
+					fields.add(CamelNotationHelper.toSQLName(field.getName()));
+					values.add(value.toString());
+				}
+			}
+		}
+		StringBuilder where = new StringBuilder();
+		boolean control = false;
+		for (String field : fields) {
+			if (control) {
+				where.append(" AND ");
+			} else {
+				control = true;
+			}
+			where.append(field).append(" = ? ");
+		}
+		return find(type, where.toString(),
+				(String[]) values.toArray(new String[0]));
 	}
 
 }
