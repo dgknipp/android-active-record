@@ -510,7 +510,7 @@ public class ActiveRecordBase {
 	 *            The condition to match (Don't include "where").
 	 * @param whereArgs
 	 *            The arguments to replace "?" with.
-	 * @return A generic list of all matching entities.
+	 * @return A generic list of all matching entities. Empty list if no matching records found
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
@@ -693,7 +693,14 @@ public class ActiveRecordBase {
 	}
 
 	/**
-	 * Return instances of an entity from the database by example.
+	 * Returns instances of an entity from the database by example. It generates
+	 * query out of input argument according to the following logic:
+	 * <ul>
+	 * <li>entity to query - corresponds to type of example class
+	 * <li>WHERE condition in SQL query - logical AND of all non-empty
+	 * (non-zero, non-null) fields from input example
+	 * <li>output result - same type as input argument
+	 * </ul>
 	 * 
 	 * @param <T>
 	 *            Any ActiveRecordBase class.
