@@ -6,7 +6,5 @@ package org.kroz.activerecord.utils;
  *
  */
 public class ARConst {
-
-	public static final String TAG = "AR";
-
+	public static String TAG = "AR";
 }

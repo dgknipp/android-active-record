@@ -23,6 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
  *         written by JEREMYOT
  */
 public class Database {
+	static final String CNAME = Database.class.getSimpleName();
 
 	static Map<String, DatabaseBuilder> _builders = new HashMap<String, DatabaseBuilder>();
 
@@ -134,12 +135,15 @@ public class Database {
 			_database = null;
 		}
 		_database = _dbHelper.getReadableDatabase();
+		Logg.d(ARConst.TAG, "(%t) %s.open(): new db obj %s", CNAME, _database.toString());
 	}
 
 	public void close() {
+		String d = _database.toString();
 		if (_database != null)
 			_database.close();
 		_database = null;
+		Logg.d(ARConst.TAG, "(%t) %s.close(): db obj %s set to null", CNAME, d);
 	}
 
 	public boolean isOpen() {
@@ -241,9 +245,10 @@ public class Database {
 	 * @param whereArgs
 	 *            The arguments to replace "?" with.
 	 * @return A cursor over the data returned.
+	 * @throws ActiveRecordException is database is null or closed 
 	 */
 	public Cursor query(String table, String[] selectColumns, String where,
-			String[] whereArgs) {
+			String[] whereArgs) throws ActiveRecordException {
 		return query(false, table, selectColumns, where, whereArgs, null, null,
 				null, null);
 	}
@@ -265,14 +270,16 @@ public class Database {
 	 * @param orderBy
 	 * @param limit
 	 * @return A cursor over the data returned.
+	 * @throws ActiveRecordException is database is null or closed 
 	 */
 	public Cursor query(boolean distinct, String table, String[] selectColumns,
 			String where, String[] whereArgs, String groupBy, String having,
-			String orderBy, String limit) {
-		final String LOG_PREFIX = Database.class.getSimpleName() + ".query()";
-		if(null==_database) {
-			Logg.e(ARConst.TAG, "(%t) %s: Illegal situation - database object is null!!!", LOG_PREFIX);
+			String orderBy, String limit) throws ActiveRecordException {
+		if (null == _database || !_database.isOpen()) {
+			Logg.e(ARConst.TAG, "(%t) %s.query(): ERROR - db object is null or closed", CNAME);
+			throw new ActiveRecordException(ErrMsg.ERR_DB_IS_NOT_OPEN);
 		}
+
 		return _database.query(distinct, table, selectColumns, where,
 				whereArgs, groupBy, having, orderBy, limit);
 	}
@@ -283,8 +290,10 @@ public class Database {
 	 * @throws ActiveRecordException
 	 */
 	public String[] getTables() throws ActiveRecordException {
-		if (null == _database || !_database.isOpen())
+		if (null == _database || !_database.isOpen()) {
+			Logg.e(ARConst.TAG, "(%t) %s.getTables(): ERROR - db object is null or closed", CNAME);
 			throw new ActiveRecordException(ErrMsg.ERR_DB_IS_NOT_OPEN);
+		}
 
 		Cursor c = query("sqlite_master", new String[] { "name" }, "type = ?",
 				new String[] { "table" });
@@ -312,15 +321,21 @@ public class Database {
 		return columns.toArray(new String[0]);
 	}
 
-	public int getVersion() throws Exception {
-		if (!_database.isOpen())
-			throw new Exception("Database closed.");
+	public int getVersion() throws ActiveRecordException {
+		if (null == _database || !_database.isOpen()) {
+			Logg.e(ARConst.TAG, "(%t) %s.getVersion(): ERROR - db object is null or closed", CNAME);
+			throw new ActiveRecordException(ErrMsg.ERR_DB_IS_NOT_OPEN);
+		}
+
 		return _database.getVersion();
 	}
 
-	public void setVersion(int version) throws Exception {
-		if (!_database.isOpen())
-			throw new Exception("Database closed.");
+	public void setVersion(int version) throws ActiveRecordException {
+		if (null == _database || !_database.isOpen()) {
+			Logg.e(ARConst.TAG, "(%t) %s.setVersion(): ERROR - db object is null or closed", CNAME);
+			throw new ActiveRecordException(ErrMsg.ERR_DB_IS_NOT_OPEN);
+		}
+
 		_database.setVersion(version);
 	}
 
