@@ -15,10 +15,9 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 
 /**
- * @author VKROZ
- * 
+ * Validates basic Create/Update/Delete operations on single DB entity
  */
-public class EntityTest extends AndroidTestCase {
+public class TimestampTest extends AndroidTestCase {
 
 	// ----------------- Fixture START --------------------//
 	int counter;
@@ -46,17 +45,13 @@ public class EntityTest extends AndroidTestCase {
 	 * Test method for {@link org.kroz.activerecord.ActiveRecordBase#test()}.
 	 */
 	public void testCreateEntity() {
-		ActiveRecordBase conn = null;
+		 // Drop database before test run, to start with clean schema. New DB
+		 // will be created on first ActiveRecordBase.open() call
+		DatabaseHelper.dropDatabase(_ctx, _dbName);
 
-		// Open DB
 		try {
-			conn = ActiveRecordBase.open(_ctx, _dbName, 1);
-		} catch (ActiveRecordException e) {
-			fail(e.getLocalizedMessage());
-		}
+			ActiveRecordBase conn = ActiveRecordBase.open(_ctx, _dbName, 1);
 
-		// Insert records
-		try {
 			User usr1 = conn.newEntity(User.class);
 			usr1.firstName = "John";
 			usr1.lastName = "Smith";
@@ -65,27 +60,16 @@ public class EntityTest extends AndroidTestCase {
 			usr1.save();
 
 			User usr2 = conn.newEntity(User.class);
-			usr2.firstName = "John2";
+			usr2.firstName = "Bill";
+			usr2.lastName = "Gates";
+			usr2.registrationDate = new Timestamp(1967, 4, 8, 5, 1, 2, 0);
+			usr2.ssn = 1234567890;
 			usr2.save();
 
-			usr2.firstName = "Some3";
-			usr2.save();
-
+			conn.close();
 		} catch (ActiveRecordException e) {
 			fail(e.getLocalizedMessage());
 		}
-
-		// Find all records
-		try {
-			List<User> u = conn.findAll(User.class);
-			assertNotNull(u);
-			assertEquals(2, u.size());
-		} catch (ActiveRecordException e) {
-			fail(e.getLocalizedMessage());
-		}
-
-		// Close DB
-		conn.close();
 
 	}
 
@@ -93,12 +77,15 @@ public class EntityTest extends AndroidTestCase {
 	 * Test method for {@link org.kroz.activerecord.ActiveRecordBase#test()}.
 	 */
 	public void testFindEntity() {
-		// Open DB
 		try {
 
 			ActiveRecordBase conn = ActiveRecordBase.open(_ctx, _dbName, 1);
-			List<User> u = conn.findAll(User.class);
-			assertNotNull(u);
+			List<User> ul = conn.findAll(User.class);
+			assertEquals(2, ul.size());
+
+			User u = ul.get(1);
+			assertEquals(new Timestamp(1967, 4, 8, 5, 1, 2, 0),
+					u.registrationDate);
 			conn.close();
 		} catch (ActiveRecordException e) {
 			fail(e.getLocalizedMessage());

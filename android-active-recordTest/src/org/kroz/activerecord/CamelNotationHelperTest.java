@@ -4,6 +4,12 @@ import org.kroz.activerecord.CamelNotationHelper;
 
 import android.test.AndroidTestCase;
 
+/**
+ * Checks CamelNotationHelper methods
+ * @author vkroz
+ * @see CamelNotationHelperTest
+ *
+ */
 public class CamelNotationHelperTest extends AndroidTestCase {
 
 	final String[] sqlStr = { "AB_CD", "THIS_IS_A_NAME", "DAO", "DB_CHANGES",
