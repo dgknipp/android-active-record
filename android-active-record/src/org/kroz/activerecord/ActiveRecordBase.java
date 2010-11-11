@@ -61,6 +61,14 @@ public class ActiveRecordBase {
 	public void open() throws ActiveRecordException {
 		m_Database.open();
 	}
+	
+	/**
+	 * Returns true is underlying database object is open
+	 * @return
+	 */
+	public boolean isOpen() {
+		return m_Database.isOpen();
+	}
 
 	/**
 	 * Closes ActiveRecord object and associated underlying database
