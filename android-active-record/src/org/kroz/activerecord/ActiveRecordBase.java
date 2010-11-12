@@ -588,7 +588,7 @@ public class ActiveRecordBase {
 	 * @param type
 	 *            The class of the entities to return.
 	 * @param column
-	 *            The column to match.
+	 *            The tables's column to match. Note - it must be name from DB schema, not Java field name 
 	 * @param value
 	 *            The desired value.
 	 * @return A generic list of all matching entities.
