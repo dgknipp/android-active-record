@@ -15,11 +15,11 @@ import android.app.Application;
  * @author vkroz
  * 
  */
-public class ArrApplication extends Application {
+public class MyApplication extends Application {
 
 	public ActiveRecordBase mDatabase;
 
-	public ArrApplication() {
+	public MyApplication() {
 
 	}
 

@@ -12,7 +12,7 @@
             </intent-filter>
         </activity>
 
-    <activity android:name="AarExampleActivity"></activity>
+    <activity android:name="CrudExample1Activity"></activity>
 </application>
 
 

@@ -17,7 +17,7 @@ import android.widget.Toast;
  * @author VKROZ
  *
  */
-public class AarExampleActivity extends ListActivity {
+public class CrudExample1Activity extends ListActivity {
 	
 	static final String[] DUMMY = new String[] {
 	    "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra",

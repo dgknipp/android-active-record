@@ -40,7 +40,7 @@ public class MainActivity extends ListActivity {
 				switch (position) {
 				case 0:
 					Intent i = new Intent(MainActivity.this
-							.getApplicationContext(), AarExampleActivity.class);
+							.getApplicationContext(), CrudExample1Activity.class);
 					startActivity(i);
 				}
 //				// When clicked, show a toast with the TextView text
