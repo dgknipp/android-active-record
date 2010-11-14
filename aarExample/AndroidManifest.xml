@@ -12,7 +12,7 @@
             </intent-filter>
         </activity>
 
-    <activity android:name="CrudExample1Activity"></activity>
+    <activity android:name="CrudExample1Activity" android:theme="@android:style/Theme.NoTitleBar"></activity>
 </application>
 
 
