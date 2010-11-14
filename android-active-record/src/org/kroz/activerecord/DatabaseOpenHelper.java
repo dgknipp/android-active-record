@@ -6,27 +6,29 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
- * Provides access to a database of notes. Each note has a title, the note
- * itself, a creation date and a modified data.
+ * Internal framework class. Utilize DatabaseBuilder to produce DDL statements
+ * directly out of Java classes.
  * 
  * @author Vladimir Kroz (AKA vkroz)
  * 
  *         This project based on and inspired by 'androidactiverecord' project
  *         written by JEREMYOT
  */
-public class DatabaseOpenHelper extends SQLiteOpenHelper {
+class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	DatabaseBuilder _builder;
 	int _version;
 
 	/**
 	 * Constructor
+	 * 
 	 * @param ctx
 	 * @param dbPath
 	 * @param dbVersion
 	 * @param builder
 	 */
-	DatabaseOpenHelper(Context ctx, String dbPath, int dbVersion, DatabaseBuilder builder) {
+	public DatabaseOpenHelper(Context ctx, String dbPath, int dbVersion,
+			DatabaseBuilder builder) {
 		super(ctx, dbPath, null, dbVersion);
 		_builder = builder;
 		_version = dbVersion;
@@ -40,7 +42,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 				sqlStr = _builder.getSQLCreate(table);
 			} catch (ActiveRecordException e) {
 				Log.e(this.getClass().getName(), e.getMessage(), e);
-			} 
+			}
 			if (sqlStr != null)
 				db.execSQL(sqlStr);
 		}

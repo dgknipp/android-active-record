@@ -3,22 +3,30 @@ package org.kroz.activerecord.utils;
 import android.util.Log;
 
 /**
- * Convenience wrapper for android logger
- * 
- * Priorities VERBOSE 2 (0x00000002) DEBUG 3 (0x00000003) INFO 4 (0x00000004)
- * WARN 5 (0x00000005) ERROR 6 (0x00000006)
+ * Extended android logger with 'printf'-style logging and controlled
+ * indentation. Use it similar to standard Android Log class. To start or stop
+ * indentations of log messages call method indents().<p/>
+ * Log messages priorities
+ * <ul>
+ * <li>VERBOSE 2 (0x00000002)
+ * <li>DEBUG 3 (0x00000003)
+ * <li>INFO 4 (0x00000004)
+ * <li>WARN 5 (0x00000005)
+ * <li>ERROR 6 (0x00000006)
+ * </ul>
  * 
  */
 public class Logg {
-
 
 	static int _startIdentLevel = -1;
 
 	private static boolean _useIdents = false;
 
 	/**
-	 * Starts/stops identation in log printing
-	 * @param useIdents true to start identation, false - to stop it
+	 * Starts/stops indentation in logs printing
+	 * 
+	 * @param useIdents
+	 *            true to start identation, false - to stop it
 	 */
 	public static void indents(boolean useIdents) {
 		_useIdents = useIdents;
@@ -26,14 +34,14 @@ public class Logg {
 				Thread.currentThread().getStackTrace().length - 1, 0);
 	}
 
-//	public static void startIdents() {
-//		_startIdentLevel = Math.max(
-//				Thread.currentThread().getStackTrace().length - 1, 0);
-//	}
+	// public static void startIdents() {
+	// _startIdentLevel = Math.max(
+	// Thread.currentThread().getStackTrace().length - 1, 0);
+	// }
 
-//	public static void resetIdents() {
-//		_startIdentLevel = -1;
-//	}
+	// public static void resetIdents() {
+	// _startIdentLevel = -1;
+	// }
 
 	/** Send a DEBUG log message. */
 	public static int d(String tag, String format, Object... args) {
@@ -131,8 +139,8 @@ public class Logg {
 	private static String getIdent() {
 		if (_useIdents) {
 			int currentIdentLevel = Thread.currentThread().getStackTrace().length - 1;
-			currentIdentLevel = Math.min(idents.length - 1, Math.max(0,
-					currentIdentLevel - _startIdentLevel));
+			currentIdentLevel = Math.min(idents.length - 1,
+					Math.max(0, currentIdentLevel - _startIdentLevel));
 			return idents[currentIdentLevel];
 		} else {
 			return "";
@@ -143,24 +151,9 @@ public class Logg {
 		return Thread.currentThread().getId();
 	}
 
-	static String[] idents = { 
-		"", 
-		" ", 
-		"  ", 
-		"   ", 
-		"    ", 
-		"     ", 
-		"      ",
-		"       ", 
-		"        ", 
-		"         ", 
-		"          ", 
-		"           ", 
-		"            ", 
-		"             ", 
-		"              ", 
-		"               " 
-		};
+	static String[] idents = { "", " ", "  ", "   ", "    ", "     ", "      ",
+			"       ", "        ", "         ", "          ", "           ",
+			"            ", "             ", "              ",
+			"               " };
 
-	
 }

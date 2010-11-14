@@ -5,7 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Helper class to create/upgrade/open DB.
+ * Defines DB schema definition statements from provided Java classes. <br/>
+ * Use this class to specify structure of your DB. Call method addClass() for
+ * each table and provide corresponding Java class. <br/>
+ * Normally this class instantiated only once at the very beginning of the
+ * application lifecycle. Once instantiated it is used by underlying
+ * SQLDatabaseHelper and provides SQL statements for create or upgrade of DB
+ * schema.
  * 
  * @author Vladimir Kroz (vkroz)
  */
