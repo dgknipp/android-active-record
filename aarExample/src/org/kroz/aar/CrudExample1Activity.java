@@ -7,7 +7,6 @@ import java.util.GregorianCalendar;
 import org.kroz.aar.enities.User;
 import org.kroz.activerecord.ActiveRecordBase;
 import org.kroz.activerecord.ActiveRecordException;
-import org.kroz.activerecord.utils.ARConst;
 import org.kroz.activerecord.utils.Logg;
 
 import android.app.ListActivity;
@@ -28,7 +27,7 @@ import android.widget.Toast;
  */
 public class CrudExample1Activity extends ListActivity {
 	// Convenience variables to use with logger
-	static final String TAG = ARConst.TAG;
+	static final String TAG = Const.TAG;
 	static final String CNAME = CrudExample1Activity.class.getSimpleName();
 	
 	static final User[] DUMMY = new User[10];
@@ -66,7 +65,7 @@ public class CrudExample1Activity extends ListActivity {
 	private void initDb() {
 		try {
 			// Open database
-			_db = ActiveRecordBase.open(this, ARConst.DB_NAME, ARConst.DB_VERSION);
+			_db = ActiveRecordBase.open(this, Const.DATABASE_NAME, Const.DATABASE_VERSION);
 
 			// purge Users table
 			_db.delete(User.class, null, null);
