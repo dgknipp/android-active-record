@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteException;
 /**
  * Base class for tables entities  
  * @author Vladimir Kroz (AKA vkroz)
+ * @author Wagied Davids
  * 
  *         This project based on and inspired by 'androidactiverecord' project
  *         written by JEREMYOT
@@ -533,6 +534,8 @@ public class ActiveRecordBase {
 	 *            The condition to match (Don't include "where").
 	 * @param whereArgs
 	 *            The arguments to replace "?" with.
+	 * @param groupBy
+	 * @param having
 	 * @param orderBy
 	 * @param limit
 	 * @return A generic list of all matching entities.
@@ -541,7 +544,7 @@ public class ActiveRecordBase {
 	 * @throws InstantiationException
 	 */
 	public <T extends ActiveRecordBase> List<T> find(Class<T> type,
-			boolean distinct, String whereClause, String[] whereArgs,
+			boolean distinct, String whereClause, String[] whereArgs, String groupBy, String having, 
 			String orderBy, String limit) throws ActiveRecordException {
 		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
@@ -555,7 +558,7 @@ public class ActiveRecordBase {
 		}
 		List<T> toRet = new ArrayList<T>();
 		Cursor c = m_Database.query(distinct, entity.getTableName(), null,
-				whereClause, whereArgs, null, null, orderBy, limit);
+				whereClause, whereArgs, groupBy, having, orderBy, limit);
 		try {
 			while (c.moveToNext()) {
 				entity = s_EntitiesMap.get(type, c.getLong(c
