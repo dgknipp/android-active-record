@@ -14,6 +14,7 @@ import android.util.Log;
  * <li>WARN 5 (0x00000005)
  * <li>ERROR 6 (0x00000006)
  * </ul>
+ * @author Vladimir Kroz
  * 
  */
 public class Logg {

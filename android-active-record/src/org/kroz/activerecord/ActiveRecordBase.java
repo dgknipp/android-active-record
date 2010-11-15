@@ -13,11 +13,10 @@ import android.database.sqlite.SQLiteException;
 
 /**
  * Base class for tables entities  
- * @author Vladimir Kroz (AKA vkroz)
+ * @author Vladimir Kroz
  * @author Wagied Davids
  * 
- *         This project based on and inspired by 'androidactiverecord' project
- *         written by JEREMYOT
+ * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 public class ActiveRecordBase {
 

@@ -13,7 +13,9 @@ import java.util.Map;
  * SQLDatabaseHelper and provides SQL statements for create or upgrade of DB
  * schema.
  * 
- * @author Vladimir Kroz (vkroz)
+ * @author JEREMYOT
+ * @author Vladimir Kroz
+ * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 public class DatabaseBuilder {
 

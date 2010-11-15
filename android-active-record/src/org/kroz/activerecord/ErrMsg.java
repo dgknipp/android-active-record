@@ -3,7 +3,7 @@ package org.kroz.activerecord;
 
 /**
  * Error messages strings
- * @author vkroz
+ * @author Vladimir Kroz
  *
  */
 class ErrMsg {

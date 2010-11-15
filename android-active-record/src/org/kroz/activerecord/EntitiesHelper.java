@@ -10,8 +10,7 @@ import org.kroz.activerecord.utils.Logg;
 /**
  * Provides convenience methods to handle entites and corresponding classes
  * 
- * @author Vladimir Kroz (AKA vkroz)
- * 
+ * @author Vladimir Kroz
  */
 public class EntitiesHelper {
 	private static final String AR_BASE_CLASS_NAME = ActiveRecordBase.class

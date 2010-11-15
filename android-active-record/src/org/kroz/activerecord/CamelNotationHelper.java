@@ -3,12 +3,9 @@ package org.kroz.activerecord;
 /**
  * Converts names to/from Java to SQL according to naming convention
  * 
- * @author Vladimir Kroz (AKA vkroz)
- * @author jeremyot
+ * @author Vladimir Kroz
  * 
- *         This project based on and inspired by 'androidactiverecord' project
- *         written by JEREMYOT
- * 
+ * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 public class CamelNotationHelper {
 

@@ -2,7 +2,7 @@ package org.kroz.activerecord.utils;
 
 /**
  * Active Record constants
- * @author Vladimir Kroz (vkroz)
+ * @author Vladimir Kroz
  *
  */
 public class ARConst {

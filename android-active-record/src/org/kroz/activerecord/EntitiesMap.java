@@ -7,8 +7,9 @@ import java.util.WeakHashMap;
 
 /**
  * 
- * @author Vladimir Kroz (AKA vkroz)
- * @author JEREMYOT, author of original 'androidactiverecord' project
+ * @author Vladimir Kroz
+ * @author JEREMYOT
+ * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 class EntitiesMap {
 	private Map<String, WeakReference<ActiveRecordBase>> map = new HashMap<String, WeakReference<ActiveRecordBase>>();

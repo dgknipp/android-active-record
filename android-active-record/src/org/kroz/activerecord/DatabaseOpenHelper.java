@@ -9,10 +9,10 @@ import android.util.Log;
  * Internal framework class. Utilize DatabaseBuilder to produce DDL statements
  * directly out of Java classes.
  * 
- * @author Vladimir Kroz (AKA vkroz)
+ * @author Vladimir Kroz
+ * @author JEREMYOT
  * 
- *         This project based on and inspired by 'androidactiverecord' project
- *         written by JEREMYOT
+ * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 class DatabaseOpenHelper extends SQLiteOpenHelper {
 

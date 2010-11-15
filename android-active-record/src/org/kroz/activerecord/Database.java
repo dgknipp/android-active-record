@@ -16,11 +16,10 @@ import android.database.sqlite.SQLiteDatabase;
 /**
  * Represents a database to be used by Android Active Record entities.
  * 
- * @author Vladimir Kroz (AKA vkroz)
- * @author jeremyot
+ * @author JEREMYOT
+ * @author Vladimir Kroz
  * 
- *         This project based on and inspired by 'androidactiverecord' project
- *         written by JEREMYOT
+ * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 public class Database {
 	static final String CNAME = Database.class.getSimpleName();
