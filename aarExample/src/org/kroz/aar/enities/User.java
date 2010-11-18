@@ -22,7 +22,7 @@ public class User extends ActiveRecordBase {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		return sb.append(getID()).append(_id).append(firstName).append(" ")
+		return sb.append(_id).append(" ").append(firstName).append(" ")
 				.append(lastName).toString();
 	}
 

@@ -3,10 +3,12 @@ package org.kroz.aar;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import org.kroz.aar.enities.User;
 import org.kroz.activerecord.ActiveRecordBase;
 import org.kroz.activerecord.ActiveRecordException;
+import org.kroz.activerecord.EntitiesHelper;
 import org.kroz.activerecord.utils.Logg;
 
 import android.app.ListActivity;
@@ -31,7 +33,9 @@ public class CrudExample1Activity extends ListActivity {
 	static final String CNAME = CrudExample1Activity.class.getSimpleName();
 
 	static final User[] DUMMY = new User[10];
+
 	ActiveRecordBase _db;
+	List<User> _users;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -43,7 +47,7 @@ public class CrudExample1Activity extends ListActivity {
 		initDb();
 
 		setListAdapter(new ArrayAdapter<User>(this,
-				android.R.layout.simple_list_item_1, DUMMY));
+				android.R.layout.simple_list_item_1, _users));
 
 		ListView lv = getListView();
 		lv.setTextFilterEnabled(true);
@@ -72,12 +76,16 @@ public class CrudExample1Activity extends ListActivity {
 
 			// Insert DUMMY array into Users table
 			for (User user : DUMMY) {
-				user.save();
+				User u = _db.newEntity(User.class);
+				EntitiesHelper.copyFieldsWithoutID(u, user);
+				u.save();
 			}
+
+			_users = _db.find(User.class, null, null);
+
 		} catch (ActiveRecordException e) {
 			Logg.e(TAG, e, "(%t) %s.initDb(): Error=%s", CNAME, e.getMessage());
 		}
-
 	}
 
 	public void addRecord(View v) {
