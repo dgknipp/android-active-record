@@ -33,9 +33,7 @@ public class Logg {
 	public static boolean useIdents = false;
 
 	/**
-	 * @deprecated According to Android development guideline it's better to
-	 *             call attribute directly Starts/stops indentation in logs
-	 *             printing
+	 * @deprecated new recommended approach - set/unset attribute useIdents directly. 
 	 * 
 	 * @param flag
 	 *            true to start indentation, false - to stop it
