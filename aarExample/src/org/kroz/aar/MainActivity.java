@@ -20,7 +20,7 @@ import android.widget.Toast;
  */
 public class MainActivity extends ListActivity {
 
-	static final String[] ITEMS = new String[] { "Basic CRUD test" };
+	static final String[] ITEMS = new String[] { "Basic CRUD test", "Expandable List" };
 
 	/** Called when the activity is first created. */
 	@Override
@@ -39,9 +39,13 @@ public class MainActivity extends ListActivity {
 					int position, long id) {
 				switch (position) {
 				case 0:
-					Intent i = new Intent(MainActivity.this
-							.getApplicationContext(), CrudExample1Activity.class);
-					startActivity(i);
+					startActivity(new Intent(MainActivity.this
+							.getApplicationContext(), CrudExample1Activity.class));
+					break;
+				case 1:
+					startActivity(new Intent(MainActivity.this
+							.getApplicationContext(), ExpandableList1Activity.class));
+					break;
 				}
 //				// When clicked, show a toast with the TextView text
 //				Toast.makeText(getApplicationContext(),
