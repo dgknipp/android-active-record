@@ -12,11 +12,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 
 /**
- * Base class for tables entities  
+ * Base class for tables entities
+ * 
  * @author Vladimir Kroz
  * @author Wagied Davids
  * 
- * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
+ *         <p>
+ *         This project based on and inspired by 'androidactiverecord' project
+ *         written by JEREMYOT
+ *         </p>
  */
 public class ActiveRecordBase {
 
@@ -61,9 +65,10 @@ public class ActiveRecordBase {
 	public void open() throws ActiveRecordException {
 		m_Database.open();
 	}
-	
+
 	/**
 	 * Returns true is underlying database object is open
+	 * 
 	 * @return
 	 */
 	public boolean isOpen() {
@@ -237,7 +242,8 @@ public class ActiveRecordBase {
 
 	/**
 	 * Insert this entity into the database.
-	 * @return the row ID of the newly inserted row, or -1 if an error occurred 
+	 * 
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 * @throws ActiveRecordException
 	 */
 	public long insert() throws ActiveRecordException {
@@ -247,7 +253,8 @@ public class ActiveRecordBase {
 		for (Field column : columns) {
 			try {
 				if (column.getType().getSuperclass() == ActiveRecordBase.class)
-					values.put(CamelNotationHelper.toSQLName(column.getName()),
+					values.put(
+							CamelNotationHelper.toSQLName(column.getName()),
 							column.get(this) != null ? String
 									.valueOf(((ActiveRecordBase) column
 											.get(this))._id) : "0");
@@ -261,12 +268,13 @@ public class ActiveRecordBase {
 		_id = m_Database.insert(getTableName(), values);
 		if (-1 != _id)
 			m_NeedsInsert = false;
-		
+
 		return _id;
 	}
 
 	/**
 	 * Update this entity in the database.
+	 * 
 	 * @return The number of rows affected
 	 * @throws NoSuchFieldException
 	 */
@@ -276,7 +284,8 @@ public class ActiveRecordBase {
 		for (Field column : columns) {
 			try {
 				if (column.getType().getSuperclass() == ActiveRecordBase.class)
-					values.put(CamelNotationHelper.toSQLName(column.getName()),
+					values.put(
+							CamelNotationHelper.toSQLName(column.getName()),
 							column.get(this) != null ? String
 									.valueOf(((ActiveRecordBase) column
 											.get(this))._id) : "0");
@@ -313,6 +322,7 @@ public class ActiveRecordBase {
 
 	/**
 	 * Saves this entity to the database, inserts or updates as needed.
+	 * 
 	 * @return number of rows affected on success, -1 on failure
 	 * @throws ActiveRecordException
 	 */
@@ -321,13 +331,13 @@ public class ActiveRecordBase {
 
 		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
-		
+
 		if (null == findByID(this.getClass(), _id))
 			r = insert();
 		else
 			r = update();
 		s_EntitiesMap.set(this);
-		
+
 		return r;
 	}
 
@@ -348,41 +358,35 @@ public class ActiveRecordBase {
 				String typeString = field.getType().getName();
 				String colName = CamelNotationHelper.toSQLName(field.getName());
 				if (typeString.equals("long")) {
-					field.setLong(this, cursor.getLong(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("java.lang.String")) {
-					String val = cursor.getString(cursor.getColumnIndex(colName));
+					field.setLong(this,
+							cursor.getLong(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("java.lang.String")) {
+					String val = cursor.getString(cursor
+							.getColumnIndex(colName));
 					field.set(this, val.equals("null") ? null : val);
 				} else if (typeString.equals("double")) {
-					field.setDouble(this, cursor.getDouble(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("boolean")) {
-					field.setBoolean(this, cursor.getString(
-							cursor.getColumnIndex(colName)).equals(
-							"true"));
-				}
-				else if (typeString.equals("[B")) {
-					field.set(this, cursor.getBlob(cursor.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("int")) {
-					field.setInt(this, cursor.getInt(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("float")) { 
-					field.setFloat(this, cursor.getFloat(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("short")) {
-					field.setShort(this, cursor.getShort(cursor
-							.getColumnIndex(colName)));
-				}
-				else if (typeString.equals("java.sql.Timestamp")) {
+					field.setDouble(this,
+							cursor.getDouble(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("boolean")) {
+					field.setBoolean(this,
+							cursor.getString(cursor.getColumnIndex(colName))
+									.equals("true"));
+				} else if (typeString.equals("[B")) {
+					field.set(this,
+							cursor.getBlob(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("int")) {
+					field.setInt(this,
+							cursor.getInt(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("float")) {
+					field.setFloat(this,
+							cursor.getFloat(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("short")) {
+					field.setShort(this,
+							cursor.getShort(cursor.getColumnIndex(colName)));
+				} else if (typeString.equals("java.sql.Timestamp")) {
 					long l = cursor.getLong(cursor.getColumnIndex(colName));
 					field.set(this, new Timestamp(l));
-				}
-				else if (field.getType().getSuperclass() == ActiveRecordBase.class) {
+				} else if (field.getType().getSuperclass() == ActiveRecordBase.class) {
 					long id = cursor.getLong(cursor.getColumnIndex(colName));
 					if (id > 0)
 						entities.put(field, id);
@@ -402,8 +406,9 @@ public class ActiveRecordBase {
 		s_EntitiesMap.set(this);
 		for (Field f : entities.keySet()) {
 			try {
-				f.set(this, this.findByID((Class<? extends ActiveRecordBase>) f
-						.getType(), entities.get(f)));
+				f.set(this, this.findByID(
+						(Class<? extends ActiveRecordBase>) f.getType(),
+						entities.get(f)));
 			} catch (SQLiteException e) {
 				throw new ActiveRecordException(e.getLocalizedMessage());
 			} catch (IllegalArgumentException e) {
@@ -467,7 +472,14 @@ public class ActiveRecordBase {
 	}
 
 	/**
-	 * Return all instances of an entity that match the given criteria.
+	 * Return all instances of an entity that match the given criteria. Use
+	 * whereClause to specify condition, using reqular SQL syntax for WHERE
+	 * clause.
+	 * <p>
+	 * For example selecting all JOHNs born in 2001 from USERS table may look like:
+	 * <pre>
+	 * users.find(Users.class, "NAME='?' and YEAR=?", new String[] {"John", "2001"});
+	 * </pre>
 	 * 
 	 * @param <T>
 	 *            Any ActiveRecordBase class.
@@ -500,14 +512,14 @@ public class ActiveRecordBase {
 				whereArgs);
 		try {
 			while (c.moveToNext()) {
-				entity = s_EntitiesMap.get(type, c.getLong(c
-						.getColumnIndex("_id")));
+				entity = s_EntitiesMap.get(type,
+						c.getLong(c.getColumnIndex("_id")));
 				if (entity == null) {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
 					entity.inflate(c);
 					entity.m_Database = m_Database;
-					
+
 				}
 				toRet.add(entity);
 			}
@@ -543,8 +555,9 @@ public class ActiveRecordBase {
 	 * @throws InstantiationException
 	 */
 	public <T extends ActiveRecordBase> List<T> find(Class<T> type,
-			boolean distinct, String whereClause, String[] whereArgs, String groupBy, String having, 
-			String orderBy, String limit) throws ActiveRecordException {
+			boolean distinct, String whereClause, String[] whereArgs,
+			String groupBy, String having, String orderBy, String limit)
+			throws ActiveRecordException {
 		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
 		T entity;
@@ -560,14 +573,14 @@ public class ActiveRecordBase {
 				whereClause, whereArgs, groupBy, having, orderBy, limit);
 		try {
 			while (c.moveToNext()) {
-				entity = s_EntitiesMap.get(type, c.getLong(c
-						.getColumnIndex("_id")));
+				entity = s_EntitiesMap.get(type,
+						c.getLong(c.getColumnIndex("_id")));
 				if (entity == null) {
 					entity = type.newInstance();
 					entity.m_NeedsInsert = false;
 					entity.inflate(c);
 					entity.m_Database = m_Database;
-					
+
 				}
 				toRet.add(entity);
 			}
@@ -590,7 +603,8 @@ public class ActiveRecordBase {
 	 * @param type
 	 *            The class of the entities to return.
 	 * @param column
-	 *            The tables's column to match. Note - it must be name from DB schema, not Java field name 
+	 *            The tables's column to match. Note - it must be name from DB
+	 *            schema, not Java field name
 	 * @param value
 	 *            The desired value.
 	 * @return A generic list of all matching entities.
