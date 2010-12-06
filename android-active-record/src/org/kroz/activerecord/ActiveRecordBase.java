@@ -675,4 +675,11 @@ public class ActiveRecordBase {
 		return find(type, null, null);
 	}
 
+	/**
+	 * Returns underlying database object for direct manipulations
+	 * @return
+	 */
+	public Database getDatabase() {
+		return m_Database;
+	}
 }
