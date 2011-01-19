@@ -23,6 +23,7 @@ public class EntityTest extends AndroidTestCase {
 	// ----------------- Fixture START --------------------//
 	int counter;
 	String _dbName;
+	int _dbVersion;
 	Context _ctx;
 	DatabaseBuilder _builder;
 
@@ -30,8 +31,11 @@ public class EntityTest extends AndroidTestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		
 		_dbName = TestConst.DB_NAME;
+		_dbVersion = TestConst.DB_VERSION1;
 		_ctx = getContext();
+		
 		_builder = new DatabaseBuilder(TestConst.DB_NAME);
 		_builder.addClass(User.class);
 		_builder.addClass(UserData.class);
@@ -40,6 +44,8 @@ public class EntityTest extends AndroidTestCase {
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		// -- We want a clean run in between each test -- //
+		DatabaseHelper.dropDatabase(_ctx, _dbName);
 	}
 
 	/**
@@ -50,7 +56,7 @@ public class EntityTest extends AndroidTestCase {
 
 		// Open DB
 		try {
-			conn = ActiveRecordBase.open(_ctx, _dbName, 1);
+			conn = ActiveRecordBase.open(_ctx, _dbName, _dbVersion);
 		} catch (ActiveRecordException e) {
 			fail(e.getLocalizedMessage());
 		}
@@ -96,7 +102,7 @@ public class EntityTest extends AndroidTestCase {
 		// Open DB
 		try {
 
-			ActiveRecordBase conn = ActiveRecordBase.open(_ctx, _dbName, 1);
+			ActiveRecordBase conn = ActiveRecordBase.open(_ctx, _dbName, _dbVersion);
 			List<User> u = conn.findAll(User.class);
 			assertNotNull(u);
 			conn.close();

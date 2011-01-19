@@ -26,10 +26,18 @@ public class ConnectionTest extends AndroidTestCase {
 		_dbName = TestConst.DB_NAME;
 		_dbVersion = TestConst.DB_VERSION1;
 		_ctx = getContext();
+		
+		// -- Prepare -- //
+		_builder = new DatabaseBuilder(TestConst.DB_NAME);
+		_builder.addClass(User.class);
+		_builder.addClass(UserData.class);
+		Database.setBuilder(_builder);
 	}
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		// -- We want a clean run in between each test -- //
+		DatabaseHelper.dropDatabase(_ctx, _dbName);
 	}
 
 	public void testPreconditions() {
