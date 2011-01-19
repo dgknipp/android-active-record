@@ -3,10 +3,12 @@
  */
 package org.kroz.activerecord;
 
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.kroz.activerecord.ActiveRecordBase;
 import org.kroz.activerecord.test.fixtures.TestConst;
 import org.kroz.activerecord.test.fixtures.User;
 import org.kroz.activerecord.test.fixtures.UserData;
@@ -93,6 +95,21 @@ public class EntityTest extends AndroidTestCase {
 		// Close DB
 		conn.close();
 
+	}
+
+	public void testCreateEntityUsingMap() throws Exception {
+		 Map<String, Object> createEntityValues = new HashMap<String, Object>();
+		 createEntityValues.put("firstName", "John");
+		 createEntityValues.put("lastName", "Smith");
+		 createEntityValues.put("registrationDate", new Timestamp(123456));
+		 createEntityValues.put("ssn", new Long(123456789));
+
+		 User johnSmith = new User(createEntityValues);
+
+		 assertEquals("John", johnSmith.firstName);
+		 assertEquals("Smith", johnSmith.lastName);
+		 assertEquals(new Timestamp(123456), johnSmith.registrationDate);
+		 assertEquals(123456789, johnSmith.ssn);
 	}
 
 	/**

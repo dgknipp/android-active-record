@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -91,6 +93,43 @@ public class ActiveRecordBase {
 	}
 
 	protected ActiveRecordBase() {
+	}
+
+	/**
+	 * Creates a new entity
+	 * @param instantiationValues
+	 * 					A Map containing the values to set for this
+	 * 					new entity.
+	 */
+	protected ActiveRecordBase(Map<String, Object> instantiationValues) {
+		super();
+		try {
+			Map<String, Field> classFields = EntitiesHelper.getFieldsMap(getClass());
+			for(String key : instantiationValues.keySet()) {
+				if(classFields.containsKey(key)) {
+					Field field = classFields.get(key);
+					Class fieldClass = field.getClass();
+					Object data = instantiationValues.get(key);
+					if(fieldClass == Integer.class) {
+						field.setInt(this, ((Integer) data).intValue());
+					} else if (fieldClass == Byte.class) {
+						field.setByte(this, ((Byte) data).byteValue());
+					} else if (fieldClass == Short.class) {
+						field.setShort(this, ((Short) data).shortValue());
+					} else if(fieldClass == Long.class) {
+						field.setLong(this, ((Long) data).longValue());
+					} else if(fieldClass == Double.class) {
+						field.setDouble(this, ((Double) data).doubleValue());
+					} else if(fieldClass == Boolean.class) {
+						field.setBoolean(this, ((Boolean) data).booleanValue());
+					} else {
+						field.set(this, data);
+					}
+				}
+			}
+		} catch (IllegalAccessException e) {
+			// TODO: Fixme
+		}
 	}
 
 	/**

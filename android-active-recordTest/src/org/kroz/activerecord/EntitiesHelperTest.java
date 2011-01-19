@@ -3,15 +3,12 @@
  */
 package org.kroz.activerecord;
 
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.Map;
 
-import org.kroz.activerecord.ActiveRecordBase;
-import org.kroz.activerecord.test.fixtures.TestConst;
 import org.kroz.activerecord.test.fixtures.User;
-import org.kroz.activerecord.test.fixtures.UserData;
 
-import android.content.Context;
 import android.test.AndroidTestCase;
 
 /**
@@ -46,6 +43,23 @@ public class EntitiesHelperTest extends AndroidTestCase {
 		assertEquals(pojo.ddd, ar.ddd);
 		assertNotSame(pojo.ccc, ar.ccc);
 		assertEquals(pojo.id, ar._id);
+	}
+
+	public void testGetFieldsMap() throws Exception {
+		Map<String, Field> entityFields = EntitiesHelper.getFieldsMap(EntityAR.class);
+
+		assertEquals(5, entityFields.size());
+		assertTrue(entityFields.containsKey("aaa"));
+		assertTrue(entityFields.containsKey("aaa1"));
+		assertTrue(entityFields.containsKey("bbb"));
+		assertTrue(entityFields.containsKey("ccc"));
+		assertTrue(entityFields.containsKey("ddd"));
+
+		assertEquals("Timestamp", entityFields.get("aaa").getType().getSimpleName());
+		assertEquals("Timestamp", entityFields.get("aaa1").getType().getSimpleName());
+		assertEquals("String", entityFields.get("bbb").getType().getSimpleName());
+		assertEquals("String", entityFields.get("ccc").getType().getSimpleName());
+		assertEquals("int", entityFields.get("ddd").getType().getSimpleName());
 	}
 
 

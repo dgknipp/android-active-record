@@ -1,6 +1,7 @@
 package org.kroz.activerecord.test.fixtures;
 
 import java.sql.Timestamp;
+import java.util.Map;
 
 import org.kroz.activerecord.ActiveRecordBase;
 import org.kroz.activerecord.Database;
@@ -11,6 +12,9 @@ public class User extends ActiveRecordBase {
 	}
 	public User(Database db) {
 		super(db);
+	}
+	public User(Map<String, Object> instantiationValues) {
+		super(instantiationValues);
 	}
 	public String firstName;
 	public String lastName;

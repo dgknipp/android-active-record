@@ -1,7 +1,9 @@
 package org.kroz.activerecord;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.kroz.activerecord.utils.ARConst;
 import org.kroz.activerecord.utils.Logg;
@@ -72,6 +74,23 @@ public class EntitiesHelper {
 		}
 
 		return dst;
+	}
+
+	/**
+	 *
+	 * @param klass
+	 * @return A map of containing all the fields of this class
+	 * and with their names as keys
+	 */
+	public static Map<String, Field> getFieldsMap(Class klass) {
+		HashMap<String, Field> classFields = new HashMap<String, Field>();
+
+		Field[] klassFields = klass.getFields();
+		for(Field field : klassFields) {
+			classFields.put(field.getName(), field);
+		}
+
+		return classFields;
 	}
 
 	/**
