@@ -52,6 +52,8 @@ public class CamelNotationHelper {
 				else {
 					sb.append(c);
 				}				
+			} else if(Character.isDigit(c)) {
+				sb.append(c);
 			}
 		}
 

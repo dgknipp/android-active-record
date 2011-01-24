@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kroz.activerecord.test.fixtures.NumberedUser;
 import org.kroz.activerecord.test.fixtures.Showplace;
 import org.kroz.activerecord.test.fixtures.ShowplaceDetail;
 import org.kroz.activerecord.test.fixtures.TestConst;
@@ -69,6 +70,18 @@ public class DatabaseBuilderTest extends AndroidTestCase {
 			String expected = "CREATE TABLE USER_DATA (_id integer primary key, DESCRIPTION text, PURCHASE_DATE int, PURCHASE_ID int, USER_ID int)";
 			assertEquals("Got string: " + actual, expected.toLowerCase(), actual
 					.toLowerCase());
+		} catch (ActiveRecordException e) {
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	public void testOnCreateTableWithNumbers() {
+		DatabaseBuilder builder = new DatabaseBuilder(TestConst.DB_NAME);
+		builder.addClass(NumberedUser.class);
+		try {
+			String actual = builder.getSQLCreate("NUMBERED_USER");
+			String expected = "CREATE TABLE NUMBERED_USER (_id integer primary key, FIRST_NAME text, LAST_NAME text, PHONE_NUMBER1 text, PHONE_NUMBER2 text)";
+			assertEquals("Got string: " + actual, expected.toLowerCase(), actual.toLowerCase());
 		} catch (ActiveRecordException e) {
 			fail(e.getLocalizedMessage());
 		}

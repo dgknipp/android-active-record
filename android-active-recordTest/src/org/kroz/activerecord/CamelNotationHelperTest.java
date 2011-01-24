@@ -26,6 +26,11 @@ public class CamelNotationHelperTest extends AndroidTestCase {
 		}
 	}
 
+	public void testJavaToSqlNotationWithNumbers() {
+		String str = CamelNotationHelper.toSQLName("helloWorld1");
+		assertEquals("HELLO_WORLD1", str);
+	}
+
 	public void testSqlToJavaClassName() {
 		for (int i = 0; i < sqlStr.length; i++) {
 			String str = CamelNotationHelper.toJavaClassName(sqlStr[i]);
