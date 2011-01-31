@@ -12,6 +12,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 /**
  * Represents a database to be used by Android Active Record entities.
@@ -22,6 +23,12 @@ import android.database.sqlite.SQLiteDatabase;
  * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 public class Database {
+	private static final String INT = "int";
+	private static final String TEXT = "text";
+	private static final String BLOB = "blob";
+	private static final String BOOL = "bool";
+	private static final String REAL = "real";
+	
 	static final String CNAME = Database.class.getSimpleName();
 
 	static Map<String, DatabaseBuilder> _builders = new HashMap<String, DatabaseBuilder>();
@@ -357,17 +364,17 @@ public class Database {
 	protected static String getSQLiteTypeString(Class<?> c) {
 		String name = c.getName();
 		if (name.equals("java.lang.String"))
-			return "text";
+			return TEXT;
 		if (name.equals("short"))
-			return "int";
+			return INT;
 		if (name.equals("int"))
-			return "int";
+			return INT;
 		if (name.equals("long"))
-			return "int";
+			return INT;
 		if (name.equals("long"))
-			return "int";
+			return INT;
 		if (name.equals("java.sql.Timestamp"))
-			return "int";
+			return INT;
 		if (name.equals("double"))
 			return "real";
 		if (name.equals("float"))
@@ -377,7 +384,7 @@ public class Database {
 		if (name.equals("boolean"))
 			return "bool";
 		if (c.getSuperclass() == ActiveRecordBase.class)
-			return "int";
+			return INT;
 		throw new IllegalArgumentException(
 				"Class cannot be stored in Sqlite3 database.");
 	}

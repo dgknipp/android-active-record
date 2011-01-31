@@ -1,8 +1,11 @@
 package org.kroz.activerecord;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.kroz.activerecord.annotations.ActiveRecordIgnoreAttribute;
 
 /**
  * Defines DB schema definition statements from provided Java classes. <br/>
@@ -84,6 +87,7 @@ public class DatabaseBuilder {
 			sb = new StringBuilder("CREATE TABLE ").append(table).append(
 					" (_id integer primary key");
 			for (Field column : e.getColumnFieldsWithoutID()) {
+				if(column.getAnnotation(ActiveRecordIgnoreAttribute.class) != null) { continue; }
 				String jname = column.getName();
 				String qname = CamelNotationHelper.toSQLName(jname);
 				Class<?> jtype = column.getType();

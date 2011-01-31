@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kroz.activerecord.annotations.ActiveRecordIgnoreAttribute;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -286,24 +288,7 @@ public class ActiveRecordBase {
 	 * @throws ActiveRecordException
 	 */
 	public long insert() throws ActiveRecordException {
-		List<Field> columns = _id > 0 ? getColumnFields()
-				: getColumnFieldsWithoutID();
-		ContentValues values = new ContentValues(columns.size());
-		for (Field column : columns) {
-			try {
-				if (column.getType().getSuperclass() == ActiveRecordBase.class)
-					values.put(
-							CamelNotationHelper.toSQLName(column.getName()),
-							column.get(this) != null ? String
-									.valueOf(((ActiveRecordBase) column
-											.get(this))._id) : "0");
-				else
-					values.put(CamelNotationHelper.toSQLName(column.getName()),
-							String.valueOf(column.get(this)));
-			} catch (IllegalAccessException e) {
-				throw new ActiveRecordException(e.getLocalizedMessage());
-			}
-		}
+		ContentValues values = createContentValues();
 		_id = m_Database.insert(getTableName(), values);
 		if (-1 != _id)
 			m_NeedsInsert = false;
@@ -318,9 +303,20 @@ public class ActiveRecordBase {
 	 * @throws NoSuchFieldException
 	 */
 	public int update() throws ActiveRecordException {
-		List<Field> columns = getColumnFieldsWithoutID();
+		ContentValues values = createContentValues();
+		int r = m_Database.update(getTableName(), values, "_id = ?",
+				new String[] { String.valueOf(_id) });
+		return r;
+	}
+	
+	/**
+	 * Creates the ContentValues to be used for data insertion
+	 */
+	public ContentValues createContentValues() throws ActiveRecordException{
+		List<Field> columns = _id > 0 ? getColumnFields() : getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
+			if(column.getAnnotation(ActiveRecordIgnoreAttribute.class) != null) { continue; }
 			try {
 				if (column.getType().getSuperclass() == ActiveRecordBase.class)
 					values.put(
@@ -337,9 +333,7 @@ public class ActiveRecordBase {
 				throw new ActiveRecordException("No column " + column.getName());
 			}
 		}
-		int r = m_Database.update(getTableName(), values, "_id = ?",
-				new String[] { String.valueOf(_id) });
-		return r;
+		return values;
 	}
 
 	/**
@@ -653,6 +647,14 @@ public class ActiveRecordBase {
 			String column, String value) throws ActiveRecordException {
 		return find(type, String.format("%s = ?", column),
 				new String[] { value });
+	}
+	
+	/**
+	 * Return all the instances of an entity who are owned by this instance
+	 * 
+	 */
+	public <T extends ActiveRecordBase> List<T> getHasMany(Class<T> type) throws ActiveRecordException {
+		return findByColumn(type, CamelNotationHelper.toSQLName(this.getClass().getSimpleName()), Long.toString(getID()));
 	}
 
 	/**
