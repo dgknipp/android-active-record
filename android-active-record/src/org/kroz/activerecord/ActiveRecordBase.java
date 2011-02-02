@@ -372,10 +372,13 @@ public class ActiveRecordBase {
 		if (m_Database == null)
 			throw new ActiveRecordException("Set database first");
 
-		if (null == findByID(this.getClass(), _id))
-			r = insert();
-		else
+		if (null == findByID(this.getClass(), _id)) {
+			if(insert() > 0) {
+				r = 1;
+			}
+		} else {
 			r = update();
+		}
 		s_EntitiesMap.set(this);
 
 		return r;

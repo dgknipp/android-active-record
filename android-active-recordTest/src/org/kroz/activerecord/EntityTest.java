@@ -161,4 +161,40 @@ public class EntityTest extends AndroidTestCase {
 		}
 	}
 
+	public void testSaveEntityBug() throws Exception {
+		ActiveRecordBase conn = ActiveRecordBase.open(_ctx, _dbName, _dbVersion);
+
+		User user1 = conn.newEntity(User.class);
+		user1.firstName = "John";
+		user1.lastName = "Doe";
+		user1.registrationDate = new Timestamp(123456);
+		user1.ssn = 12345l;
+
+		User user2 = conn.newEntity(User.class);
+		user2.firstName = "John";
+		user2.lastName = "Smith";
+		user2.registrationDate = new Timestamp(654321);
+		user2.ssn = 12346l;
+
+		user2.save();
+
+		user2.firstName = "Jane";
+		user2.lastName = "Doe";
+
+		long expectedUser1Id = 2;
+		long expectedUser2Id = 1;
+
+		long expectedUser1Response = 1;
+		long expectedUser2Response = 1;
+
+		long user1SaveResponse = user1.save();
+		long user2SaveResponse = user2.save();
+
+		assertEquals(expectedUser1Id, user1.getID());
+		assertEquals(expectedUser2Id, user2.getID());
+
+		assertEquals(expectedUser1Response, user1SaveResponse);
+		assertEquals(expectedUser2Response, user2SaveResponse);
+	}
+
 }
