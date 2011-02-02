@@ -1,14 +1,15 @@
 package org.kroz.activerecord;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.kroz.activerecord.annotations.ActiveRecordIgnoreAttribute;
+import org.kroz.activerecord.annotations.ManyToManyRelation;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -316,7 +317,13 @@ public class ActiveRecordBase {
 		List<Field> columns = _id > 0 ? getColumnFields() : getColumnFieldsWithoutID();
 		ContentValues values = new ContentValues(columns.size());
 		for (Field column : columns) {
-			if(column.getAnnotation(ActiveRecordIgnoreAttribute.class) != null) { continue; }
+			Annotation ignore = column.getAnnotation(ActiveRecordIgnoreAttribute.class);
+			Annotation manyToMany = column.getAnnotation(ManyToManyRelation.class);
+			if(manyToMany != null) {
+				// TODO: Fixme
+				continue;
+			}
+			else if(ignore != null) { continue; }
 			try {
 				if (column.getType().getSuperclass() == ActiveRecordBase.class)
 					values.put(
@@ -655,6 +662,17 @@ public class ActiveRecordBase {
 	 */
 	public <T extends ActiveRecordBase> List<T> getHasMany(Class<T> type) throws ActiveRecordException {
 		return findByColumn(type, CamelNotationHelper.toSQLName(this.getClass().getSimpleName()), Long.toString(getID()));
+	}
+	
+	public <T extends ActiveRecordBase> int getCount(Class<T> type) throws ActiveRecordException {
+		T entity = newEntity(type);
+		// We don't need to perform a full projection on the database because we only need to
+		// get enough data for us to count
+		String[] projection = new String[] { CamelNotationHelper.toSQLName(entity.getColumns()[0]) };
+		Cursor c = m_Database.query(entity.getTableName(), projection, null, null);
+		int count = c.getCount();
+		c.close();
+		return count;
 	}
 
 	/**

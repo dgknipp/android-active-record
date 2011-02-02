@@ -128,5 +128,37 @@ public class EntityTest extends AndroidTestCase {
 		}
 
 	}
+	
+	public void testGetCount() {
+		try {
+			ActiveRecordBase conn = ActiveRecordBase.open(_ctx, _dbName, _dbVersion);
+			
+			assertEquals(0, conn.getCount(User.class));
+			
+			User u1 = conn.newEntity(User.class);
+			u1.firstName = "John";
+			u1.lastName = "Smith";
+			u1.registrationDate = new Timestamp(123456);
+			u1.ssn = 123456789l;
+			
+			u1.save();
+			
+			assertEquals(1, conn.getCount(User.class));
+			
+			User u2 = conn.newEntity(User.class);
+			u2.firstName = "Jane";
+			u2.lastName = "Smith";
+			u2.registrationDate = new Timestamp(123457);
+			u2.ssn = 987654321l;
+			
+			u2.save();
+			
+			assertEquals(2, conn.getCount(User.class));
+			
+			conn.close();
+		} catch (ActiveRecordException e) {
+			fail(e.getLocalizedMessage());
+		}
+	}
 
 }

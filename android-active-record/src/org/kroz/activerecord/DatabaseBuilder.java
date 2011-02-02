@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kroz.activerecord.annotations.ActiveRecordIgnoreAttribute;
+import org.kroz.activerecord.annotations.ManyToManyRelation;
 
 /**
  * Defines DB schema definition statements from provided Java classes. <br/>
@@ -87,6 +88,14 @@ public class DatabaseBuilder {
 			sb = new StringBuilder("CREATE TABLE ").append(table).append(
 					" (_id integer primary key");
 			for (Field column : e.getColumnFieldsWithoutID()) {
+				if(column.getAnnotation(ManyToManyRelation.class) != null) {
+					ManyToManyRelation many2many = (ManyToManyRelation) column.getAnnotation(ManyToManyRelation.class);
+					String joinTableName = many2many.joinTableName();
+					if(joinTableName.length() == 0) {
+						joinTableName = buildJoinTableName(this.getClass(), many2many.target());
+					}
+					//createIntersectionTableIfNotExists()
+				}
 				if(column.getAnnotation(ActiveRecordIgnoreAttribute.class) != null) { continue; }
 				String jname = column.getName();
 				String qname = CamelNotationHelper.toSQLName(jname);
@@ -112,6 +121,16 @@ public class DatabaseBuilder {
 
 	public String getDatabaseName() {
 		return _dbName;
+	}
+	
+	public String buildJoinTableName(Class source, Class target){
+		String srcStr = CamelNotationHelper.toSQLName(source.getSimpleName());
+		String trgtStr = CamelNotationHelper.toSQLName(target.getSimpleName());
+		
+		if(srcStr.compareTo(trgtStr) < 0) {
+			return srcStr + "_" + trgtStr;
+		}
+		return trgtStr + "_" + srcStr;
 	}
 
 	@SuppressWarnings("unchecked")

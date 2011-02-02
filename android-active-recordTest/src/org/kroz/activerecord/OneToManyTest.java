@@ -14,7 +14,7 @@ public class OneToManyTest extends ActiveRecordTestCase {
 		super.setUp(classes);
 	}
 	
-	public void testOneToMany() throws Exception {
+	public Keychain setupKeysAndKeychain() throws Exception {
 		Keychain chain = connection.newEntity(Keychain.class);
 		chain.name = "Keyring1";
 		
@@ -26,6 +26,11 @@ public class OneToManyTest extends ActiveRecordTestCase {
 		
 		chain.addKey(carKey);
 		chain.addKey(houseKey);
+		return chain;
+	}
+	
+	public void testOneToMany() throws Exception {
+		Keychain chain = setupKeysAndKeychain();
 		
 		chain.save();
 		
@@ -44,6 +49,21 @@ public class OneToManyTest extends ActiveRecordTestCase {
 			assertTrue( key.keyName.equals("Car Key") || key.keyName.equals("House Key"));
 		}
 		
+	}
+	
+	public void testVerifyOneToManyRelationship() throws Exception {
+		Keychain chain = setupKeysAndKeychain();
+		
+		chain.save();
+		
+		Key houseKey = connection.findByColumn(Key.class, "KEY_NAME", "House Key").get(0);
+		Key carKey = connection.findByColumn(Key.class, "KEY_NAME", "Car Key").get(0);
+		
+		assertEquals("House Key", houseKey.keyName);
+		assertEquals("Car Key", carKey.keyName);
+		
+		assertEquals(chain.getID(), carKey.keychain.getID());
+		assertEquals(chain.getID(), houseKey.keychain.getID());
 	}
 
 }

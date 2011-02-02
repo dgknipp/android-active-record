@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.kroz.activerecord.ActiveRecordBase;
 import org.kroz.activerecord.Database;
+import org.kroz.activerecord.annotations.ActiveRecordIgnoreAttribute;
 
 public class Driver extends ActiveRecordBase {
 	
@@ -12,5 +13,6 @@ public class Driver extends ActiveRecordBase {
 	
 	public String firstName;
 	public String lastName;
+	@ActiveRecordIgnoreAttribute
 	public List<Car> cars;
 }
