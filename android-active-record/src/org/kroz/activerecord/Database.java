@@ -386,7 +386,7 @@ public class Database {
 		if (c.getSuperclass() == ActiveRecordBase.class)
 			return INT;
 		throw new IllegalArgumentException(
-				"Class cannot be stored in Sqlite3 database.");
+				c.getName() +" cannot be stored in Sqlite3 database.");
 	}
 
 //	/**
