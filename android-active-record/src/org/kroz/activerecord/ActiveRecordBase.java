@@ -1,7 +1,10 @@
 package org.kroz.activerecord;
 
+import java.io.ObjectInputStream.GetField;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.util.Log;
 
 /**
  * Base class for tables entities
@@ -323,17 +327,26 @@ public class ActiveRecordBase {
 				// TODO: Fixme
 				continue;
 			}
-			else if(ignore != null) { continue; }
 			try {
-				if (column.getType().getSuperclass() == ActiveRecordBase.class)
-					values.put(
-							CamelNotationHelper.toSQLName(column.getName()),
-							column.get(this) != null ? String
-									.valueOf(((ActiveRecordBase) column
-											.get(this))._id) : "0");
-				else
+				if(column.getType().getSuperclass() == ActiveRecordBase.class) {
+					ActiveRecordBase col = (ActiveRecordBase) column.get(this);
+					// This is another entry and if it doesn't already have an ID
+					// it means we should persist *it* before we try to grab it's
+					// value
+					if(col != null && col.getID() < 0) {
+						if(col.getDatabase() == null) { col.setDatabase(getDatabase()); }
+						col.save();
+					}
+					String columnName = CamelNotationHelper.toSQLName(column.getName());
+					String value = String.valueOf( col != null ? col.getID() : 0);
+					values.put(columnName, value);
+				} else if(column.getType() == List.class) {
+				} else if(ignore != null) {
+					continue;
+				} else {
 					values.put(CamelNotationHelper.toSQLName(column.getName()),
 							String.valueOf(column.get(this)));
+				}
 			} catch (IllegalArgumentException e) {
 				throw new ActiveRecordException("No column " + column.getName());
 			} catch (IllegalAccessException e) {
@@ -378,6 +391,23 @@ public class ActiveRecordBase {
 			}
 		} else {
 			r = update();
+		}
+		for(Field column : getColumnFields()) {
+			if(column.getType() == List.class) {
+				try {
+					List<ActiveRecordBase> listObjects = (List<ActiveRecordBase>) column.get(this);
+					for(ActiveRecordBase item : listObjects) {
+						if(item.getDatabase() == null) {
+							item.setDatabase(getDatabase());
+						}
+						item.save();
+					}
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		s_EntitiesMap.set(this);
 

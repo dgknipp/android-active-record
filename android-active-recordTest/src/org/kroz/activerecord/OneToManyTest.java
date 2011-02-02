@@ -32,6 +32,10 @@ public class OneToManyTest extends ActiveRecordTestCase {
 	public void testOneToMany() throws Exception {
 		Keychain chain = setupKeysAndKeychain();
 		
+		for(Key key : chain.keys) {
+			assertEquals(0, key.keychain.getID());
+		}
+		
 		chain.save();
 		
 		List<Keychain> chains = connection.findByColumn(Keychain.class, "NAME", "Keyring1");
@@ -47,6 +51,7 @@ public class OneToManyTest extends ActiveRecordTestCase {
 		
 		for(Key key : keys) {
 			assertTrue( key.keyName.equals("Car Key") || key.keyName.equals("House Key"));
+			assertEquals(chain.getID(), key.keychain.getID());
 		}
 		
 	}

@@ -21,7 +21,7 @@ public class Keychain extends ActiveRecordBase {
 		}
 		return keys;
 	}
-	
+
 	public void setKeys(List<Key> keys) throws Exception{
 		for(Key key : keys) {
 			key.keychain = this;
@@ -30,18 +30,10 @@ public class Keychain extends ActiveRecordBase {
 	}
 	
 	public void addKey(Key key) throws Exception {
-		if(getID() < 0) { save(); }
+		//if(getID() < 0) { save(); }
 		if(keys == null) { keys = new ArrayList<Key>(); }
 		key.keychain = this;
 		this.keys.add(key);
-	}
-	
-	public long save() throws ActiveRecordException {
-		long id = super.save();
-		for(Key key : keys) {
-			key.save();
-		}
-		return id;
 	}
 
 }
