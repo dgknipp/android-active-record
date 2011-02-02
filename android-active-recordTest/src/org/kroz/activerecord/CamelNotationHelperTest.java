@@ -45,4 +45,12 @@ public class CamelNotationHelperTest extends AndroidTestCase {
 		}
 	}
 
+	public void testBlacklistFunctionality() throws Exception {
+		String transaction = CamelNotationHelper.toSQLName("transaction");
+		assertEquals("XXXTRANSACTION", transaction);
+		
+		String apple = CamelNotationHelper.toSQLName("apple");
+		assertEquals("APPLE", apple);
+	}
+
 }

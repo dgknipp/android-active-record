@@ -42,6 +42,7 @@ public class ActiveRecordTestCase extends AndroidTestCase {
 	
 	public void tearDown() throws Exception {
 		super.tearDown();
+		connection.close();
 		DatabaseHelper.dropDatabase(_ctx, _dbName);
 	}
 	

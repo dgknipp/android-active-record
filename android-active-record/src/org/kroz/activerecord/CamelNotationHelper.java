@@ -1,5 +1,11 @@
 package org.kroz.activerecord;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.kroz.activerecord.annotations.ActiveRecordIgnoreAttribute;
+
 /**
  * Converts names to/from Java to SQL according to naming convention
  * 
@@ -8,6 +14,25 @@ package org.kroz.activerecord;
  * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 public class CamelNotationHelper {
+
+	private static final String[] BLACKLIST = {
+		"ABORT","ACTION","ADD","AFTER","ALL","ALTER","ANALYZE","AND","AS","ASC",
+		"ATTACH","AUTOINCREMENT","BEFORE","BEGIN","BETWEEN","BY","CASCADE","CASE",
+		"CAST","CHECK","COLLATE","COLUMN","COMMIT","CONFLICT","CONSTRAINT","CREATE"
+		,"CROSS","CURRENT_DATE","CURRENT_TIME","CURRENT_TIMESTAMP","DATABASE","DEFAULT",
+		"DEFERRABLE","DEFERRED","DELETE","DESC","DETACH","DISTINCT","DROP","EACH","ELSE",
+		"END","ESCAPE","EXCEPT","EXCLUSIVE","EXISTS","EXPLAIN","FAIL","FOR",
+		"FOREIGN","FROM","FULL","GLOB","GROUP","HAVING","IF","IGNORE","IMMEDIATE",
+		"IN","INDEX","INDEXED","INITIALLY","INNER","INSERT","INSTEAD","INTERSECT",
+		"INTO","IS","ISNULL","JOIN","KEY","LEFT","LIKE","LIMIT","MATCH","NATURAL",
+		"NO","NOT","NOTNULL","NULL","OF","OFFSET","ON","OR","ORDER","OUTER","PLAN",
+		"PRAGMA","PRIMARY","QUERY","RAISE","REFERENCES","REGEXP","REINDEX","RELEASE",
+		"RENAME","REPLACE","RESTRICT","RIGHT","ROLLBACK","ROW","SAVEPOINT","SELECT",
+		"SET","TABLE","TEMP","TEMPORARY","THEN","TO","TRANSACTION","TRIGGER","UNION",
+		"UNIQUE","UPDATE","USING","VACUUM","VALUES","VIEW","VIRTUAL","WHEN","WHERE"
+	};
+	private static final String SAFEWORD = "XXX";
+	private static final Set<String> BL_SET = new HashSet<String>(Arrays.asList(BLACKLIST));
 
 	public CamelNotationHelper() {
 	}
@@ -56,8 +81,11 @@ public class CamelNotationHelper {
 				sb.append(c);
 			}
 		}
-
-		return sb.toString();
+		String result = sb.toString();
+		if(BL_SET.contains(result.toUpperCase())) {
+			result = SAFEWORD + result;
+		}
+		return result;
 	}
 
 	/**
@@ -101,6 +129,9 @@ public class CamelNotationHelper {
 	 *         converted from SQL name
 	 */
 	public static String toJavaClassName(String sqlNotation) {
+		if(sqlNotation.startsWith(SAFEWORD)) {
+			sqlNotation = sqlNotation.replace(SAFEWORD, "");
+		}
 		StringBuilder sb = new StringBuilder();
 		char[] buf = sqlNotation.toCharArray();
 		for (int i = 0; i < buf.length; i++) {
