@@ -38,6 +38,7 @@ public class Database {
 	private String _path;
 	@SuppressWarnings("unused")
 	private Context _context;
+	private String _dbName;
 
 	/**
 	 * Creates a new DatabaseWrapper object
@@ -53,6 +54,7 @@ public class Database {
 	 */
 	Database(Context context, String dbName, int dbVersion, DatabaseBuilder builder) {
 		_context = context;
+		_dbName = dbName;
 		// String dbPath = (Environment.getExternalStorageState().equals(
 		// Environment.MEDIA_MOUNTED) ? appendFilePath(Environment
 		// .getExternalStorageDirectory().getAbsolutePath(), String
@@ -157,6 +159,10 @@ public class Database {
 			return true;
 		else
 			return false;
+	}
+	
+	public DatabaseBuilder getOwnBuilder() {
+		return getBuilder(_dbName);
 	}
 
 	/**

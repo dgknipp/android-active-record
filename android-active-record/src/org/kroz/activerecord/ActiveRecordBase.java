@@ -396,11 +396,26 @@ public class ActiveRecordBase {
 			if(column.getType() == List.class) {
 				try {
 					List<ActiveRecordBase> listObjects = (List<ActiveRecordBase>) column.get(this);
-					for(ActiveRecordBase item : listObjects) {
-						if(item.getDatabase() == null) {
-							item.setDatabase(getDatabase());
+					Field itemOwner = null;
+					if(listObjects != null && listObjects.size() > 0) {
+						for(Field childColumn : listObjects.get(0).getColumnFields()) {
+							// Try to find the parent column and set it
+							// automatically to save time from those setters
+							// and getters
+							if(childColumn.getType() == this.getClass()) {
+								itemOwner = childColumn;
+								break;
+							}
 						}
-						item.save();
+						for(ActiveRecordBase item : listObjects) {
+							if(item.getDatabase() == null) {
+								item.setDatabase(getDatabase());
+							}
+							if(itemOwner != null) {
+								itemOwner.set(item, this);
+							}
+							item.save();
+						}
 					}
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
@@ -465,9 +480,24 @@ public class ActiveRecordBase {
 						entities.put(field, id);
 					else
 						field.set(this, null);
+				} else if (field.getType() == List.class) {
+					String classKey = field.getName();
+					// hack
+					classKey = classKey.replaceFirst(""+classKey.charAt(0), ""+Character.toUpperCase(classKey.charAt(0)));
+					if(field.getName().endsWith("s")) {
+						classKey = classKey.substring(0, classKey.length() - 1);
+					}
+					DatabaseBuilder ownBuilder = getDatabase().getOwnBuilder();
+					Class fieldClass = ownBuilder.getClassForName(classKey);
+					if(fieldClass != null) {
+						List<ActiveRecordBase> ownObjects = (List<ActiveRecordBase>) findByColumn(fieldClass, CamelNotationHelper.toSQLName(getTableName()), Long.toString(getID()));
+						field.set(this, ownObjects);
+					}
+				} else if(field.getAnnotation(ActiveRecordIgnoreAttribute.class) != null) {
+					continue;
 				} else
 					throw new ActiveRecordException(
-							"Class cannot be read from Sqlite3 database.");
+							field.getName() + " of type "+ field.getType() + " cannot be read from Sqlite3 database.");
 			} catch (IllegalArgumentException e) {
 				throw new ActiveRecordException(e.getLocalizedMessage());
 			} catch (IllegalAccessException e) {
@@ -589,9 +619,9 @@ public class ActiveRecordBase {
 						c.getLong(c.getColumnIndex("_id")));
 				if (entity == null) {
 					entity = type.newInstance();
+					entity.m_Database = m_Database;
 					entity.m_NeedsInsert = false;
 					entity.inflate(c);
-					entity.m_Database = m_Database;
 
 				}
 				toRet.add(entity);

@@ -21,7 +21,7 @@ import org.kroz.activerecord.annotations.ManyToManyRelation;
  * <p>This project based on and inspired by 'androidactiverecord' project written by JEREMYOT</p>
  */
 public class DatabaseBuilder {
-
+	
 	@SuppressWarnings("unchecked")
 	Map<String, Class> classes = new HashMap<String, Class>();
 	String _dbName;
@@ -43,7 +43,12 @@ public class DatabaseBuilder {
 	 *            The class to reference when updating or adding a table.
 	 */
 	public <T extends ActiveRecordBase> void addClass(Class<T> c) {
-		classes.put(c.getSimpleName(), c);
+		String simpleName = c.getSimpleName();
+		classes.put(simpleName, c);
+	}
+	
+	public <T extends ActiveRecordBase> Class<T> getClassForName(String simpleName){
+		return (Class<T>) classes.get(simpleName);
 	}
 
 	/**
